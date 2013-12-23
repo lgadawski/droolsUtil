@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+    <persistence-unit name="hsqldb-ds"
+        transaction-type="RESOURCE_LOCAL">
+
+        <description>HSQLDB Persistence Unit</description>
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+        <!-- This is where we tell JPA/Hibernate about our @Entity objects -->
+        <class>com.gadawski.util.facts.Car</class>
+        <class>com.gadawski.util.facts.Customer</class>
+        <class>com.gadawski.util.facts.House</class>
+        <class>com.gadawski.util.facts.Relationship</class>
+        <class>com.gadawski.util.facts.JoinNode</class>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver"
+                value="oracle.jdbc.driver.OracleDriver" />
+            <!-- jdbc:oracle:thin:@127.0.0.1:1521:MKYONG -->
+            <property name="javax.persistence.jdbc.url"
+                value="jdbc:oracle:thin:@127.0.0.1:1521:xe" />
+            <property name="javax.persistence.jdbc.user" value="gadon" />
+            <property name="javax.persistence.jdbc.password"
+                value="abelrm" />
+
+            <property name="hibernate.dialect"
+                value="org.hibernate.dialect.Oracle10gDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="create" />
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <!-- <property name="hibernate.transaction.flush_before_completion" 
+                value="true" /> -->
+        </properties>
+    </persistence-unit>
+</persistence>
