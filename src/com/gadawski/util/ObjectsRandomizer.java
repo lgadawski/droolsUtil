@@ -33,26 +33,33 @@ public class ObjectsRandomizer {
      * Number of random generated person objects in file.
      */
     // private static final int sNUM_OF_CUSTOMERS = 100000;
-    private static final int sNUM_OF_CUSTOMERS = 20;
+    private static int sNUM_OF_CUSTOMERS = 100;
     /**
      * Number of random generated car objects in file.
      */
     // private static final int sNUM_OF_CARS = 50000;
-    private static final int sNUM_OF_CARS = 20;
+    private static int sNUM_OF_CARS = 100;
     /**
      * Number of random generated house objects in file.
      */
     // private static final int sNUM_OF_HOUSES = 50000;
-    private static final int sNUM_OF_HOUSES = 20;
+    private static int sNUM_OF_HOUSES = 100;
 
     /**
      * Generates data to file.
      * 
      * @param path
      *            - file name for output data.
+     * @param noHouses
+     * @param noCars
+     * @param noCustomers
      */
-    public static void generateData(final String path) {
+    public static void generateData(final String path, Integer noCustomers,
+            Integer noCars, Integer noHouses) {
         Writer writer = null;
+        sNUM_OF_CUSTOMERS = noCustomers;
+        sNUM_OF_CARS = noCars;
+        sNUM_OF_HOUSES = noHouses;
         try {
             // TODO handle wrong resource path, gets null pointer exception
             // when resource path is invalid!

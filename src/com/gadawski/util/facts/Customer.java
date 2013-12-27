@@ -37,7 +37,7 @@ public class Customer {
 	/**
 	 * Min cash value for person.
 	 */
-	public static final float sMIN_CASH = 200001;
+	public static final float sMIN_CASH = 0;
 	/**
 	 * Max cash value for person.
 	 */

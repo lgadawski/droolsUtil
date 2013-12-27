@@ -28,6 +28,10 @@ public class EntityManagerUtil {
     private static EntityManagerFactory m_entityManagerFactory = Persistence
             .createEntityManagerFactory("hsqldb-ds");
     /**
+     * Instance of {@link EntityManagerUtil}.
+     */
+    private static EntityManagerUtil INSTANCE;
+    /**
      * Entity manager.
      */
     private final EntityManager m_entityManager;
@@ -36,45 +40,43 @@ public class EntityManagerUtil {
      */
     private final EntityTransaction m_transaction;
 
-    // /**
-    // * @return
-    // */
-    // public static EntityManagerFactory getEntityManagerFactory() {
-    // EntityManagerFactory emf = Persistence
-    // .createEntityManagerFactory("hsqldb-ds");
-    // return emf;
-    // }
-
     /**
      * Creates entity manager and gets transaction for session.
      */
-    public EntityManagerUtil() {
+    private EntityManagerUtil() {
         m_entityManager = m_entityManagerFactory.createEntityManager();
         m_transaction = m_entityManager.getTransaction();
     }
 
     /**
-     * Persist object to db. Locally it has to be used with EntityTransaction.
+     * @return instance of {@link EntityManagerUtil} object.
+     */
+    public static EntityManagerUtil getInstance() {
+        if (INSTANCE != null) {
+            return INSTANCE;
+        } else {
+            return new EntityManagerUtil();
+        }
+    }
+
+    /**
+     * Persists Relationship object to db.
      * 
+     * @param relationship
+     *            to persist
+     */
+    public void saveRelationship(final Relationship relationship) {
+        saveObject(relationship);
+        this.close();
+    }
+
+    /**
      * @param object
-     *            to be saved to db
      */
-    public void persist(final Object object) {
-        m_entityManager.persist(object);
-    }
-
-    /**
-     * Begins transaction
-     */
-    public void beginTransaction() {
-        m_transaction.begin();
-    }
-
-    /**
-     * Commits begined transaction and closes entity manager.
-     */
-    public void commitTransaction() {
-        m_transaction.commit();
+    public void saveObject(final Object object) {
+        this.beginTransaction();
+        this.persist(object);
+        this.commitTransaction();
     }
 
     /**
@@ -85,36 +87,55 @@ public class EntityManagerUtil {
     }
 
     /**
-     * Persists Relationship object to db.
-     * 
-     * @param relationship
-     *            to persist
-     */
-    public void persistSingleRelationship(final Relationship relationship) {
-        this.beginTransaction();
-        this.persist(relationship);
-        this.commitTransaction();
-        this.close();
-    }
-
-    /**
      * Creates query to get relationships associated with given joinNode id.
      * 
      * @param joinNodeID
      *            - id of join node.
      * @return List of relationships associated with join node.
      */
-    public List<Relationship> getRalationships(int joinNodeID) {
-        CriteriaBuilder builder = m_entityManager.getCriteriaBuilder();
-        CriteriaQuery<Relationship> query = builder
+    public List<Relationship> getRalationships(final int joinNodeID) {
+        final CriteriaBuilder builder = m_entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Relationship> query = builder
                 .createQuery(Relationship.class);
-        Root<Relationship> root = query.from(Relationship.class);
+        final Root<Relationship> root = query.from(Relationship.class);
         query.select(root).where(
                 builder.equal(root.get("joinNode_ID"), joinNodeID));
 
-        TypedQuery<Relationship> tQuery = m_entityManager.createQuery(query);
+        final TypedQuery<Relationship> tQuery = m_entityManager
+                .createQuery(query);
         List<Relationship> results = new ArrayList<Relationship>();
         results = tQuery.getResultList();
         return results;
+    }
+
+//    /**
+//     * Flushes entitymanager.
+//     */
+//    private void flush() {
+//        m_entityManager.flush();
+//    }
+
+    /**
+     * Persist object to db. Locally it has to be used with EntityTransaction.
+     * 
+     * @param object
+     *            to be saved to db
+     */
+    private void persist(final Object object) {
+        m_entityManager.persist(object);
+    }
+
+    /**
+     * Begins transaction
+     */
+    private void beginTransaction() {
+        m_transaction.begin();
+    }
+
+    /**
+     * Commits begined transaction and closes entity manager.
+     */
+    private void commitTransaction() {
+        m_transaction.commit();
     }
 }

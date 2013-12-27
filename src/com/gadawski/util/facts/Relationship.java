@@ -26,10 +26,10 @@ public class Relationship implements Serializable {
      * Serial version UID.
      */
     private static final long serialVersionUID = 1L;
-    /**
-     * Number of object types in relationships.
-     */
-    private static final int NO_OBJECT_TYPES = 3;
+//    /**
+//     * Number of object types in relationships.
+//     */
+//    private static final int NO_OBJECT_TYPES = 3;
     /**
      * Entity ID.
      */
