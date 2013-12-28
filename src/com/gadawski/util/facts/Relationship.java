@@ -26,10 +26,6 @@ public class Relationship implements Serializable {
      * Serial version UID.
      */
     private static final long serialVersionUID = 1L;
-//    /**
-//     * Number of object types in relationships.
-//     */
-//    private static final int NO_OBJECT_TYPES = 3;
     /**
      * Entity ID.
      */
@@ -70,7 +66,7 @@ public class Relationship implements Serializable {
 
     public Relationship(final int joinNodeID, final Object object) {
         this.joinNode_ID = (long) joinNodeID;
-        this.customer = (Customer) object;
+        setObject(object);
     }
 
     /**
