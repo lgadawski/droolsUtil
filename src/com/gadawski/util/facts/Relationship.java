@@ -1,6 +1,5 @@
 package com.gadawski.util.facts;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +20,11 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "RELATIONSHIPS")
-public class Relationship implements Serializable {
+public class Relationship {
     /**
-     * Serial version UID.
+     * Counts number of objects in tuple.
      */
-    private static final long serialVersionUID = 1L;
+    private int m_numberOfObjectsInTuple = 0;
     /**
      * Entity ID.
      */
@@ -112,6 +111,7 @@ public class Relationship implements Serializable {
      */
     public void setCustomer(final Customer customerID) {
         this.customer = customerID;
+        incrementNumberOfObjects();
     }
 
     /**
@@ -127,6 +127,7 @@ public class Relationship implements Serializable {
      */
     public void setCar(final Car carID) {
         this.car = carID;
+        incrementNumberOfObjects();
     }
 
     /**
@@ -142,6 +143,7 @@ public class Relationship implements Serializable {
      */
     public void setHouse(final House houseID) {
         this.house = houseID;
+        incrementNumberOfObjects();
     }
 
     @Override
@@ -198,12 +200,12 @@ public class Relationship implements Serializable {
 
     /**
      * 
-     * @return list of objects in ralationship.
+     * @return list of objects in relationship.
      */
     public List<Object> getObjects() {
         List<Object> objects = new ArrayList<Object>();
         if (customer != null) {
-           objects.add(customer);
+            objects.add(customer);
         }
         if (house != null) {
             objects.add(house);
@@ -216,10 +218,17 @@ public class Relationship implements Serializable {
 
     /**
      * Gets number of object types in relationships.
+     * 
      * @return number of object types in relationship.
      */
     public int getNoObjectsInTuple() {
-        return getObjects().size();
+        return m_numberOfObjectsInTuple;
     }
 
+    /**
+     * Increments number of objects in tuple counter.
+     */
+    private void incrementNumberOfObjects() {
+        m_numberOfObjectsInTuple++;
+    }
 }

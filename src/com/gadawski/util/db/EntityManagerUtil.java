@@ -1,5 +1,7 @@
 package com.gadawski.util.db;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -28,6 +30,10 @@ public class EntityManagerUtil {
     private static EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
             .createEntityManagerFactory("hsqldb-ds");
     /**
+     * Counter for releasing resources.
+     */
+    private static final AtomicInteger COUNTER = new AtomicInteger();
+    /**
      * Entity manager.
      */
     private EntityManager m_entityManager;
@@ -42,7 +48,6 @@ public class EntityManagerUtil {
     private EntityManagerUtil() {
         m_entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
         m_transaction = m_entityManager.getTransaction();
-        System.out.println("new entityManager");
     }
 
     /**
@@ -66,49 +71,66 @@ public class EntityManagerUtil {
     }
 
     /**
+     * Special implementation of saving object to db.
+     * 
      * @param object
      */
     public void saveObject(final Object object) {
-        beginTransaction();
         persist(object);
-        commitTransaction();
+        if ((EntityManagerUtil.COUNTER.getAndIncrement() % 10000) == 0) {
+            commitTransaction();
+            beginTransaction();
+        }
     }
 
     /**
-     * Closes entity manager.
+     * Closes entityManager and enitytManagerFactory.
      */
     public void close() {
-        m_entityManager.close();
+        if (m_entityManager.isOpen()) {
+            m_entityManager.close();
+            ENTITY_MANAGER_FACTORY.close();
+        }
     }
 
     /**
-     * Flushes entity manager.
+     * Flushes and clears entity manager.
      */
-    public void flush() {
+    public void flushAndClear() {
         m_entityManager.flush();
-    }
-
-    /**
-     * Clears entity manager.
-     */
-    public void clear() {
         m_entityManager.clear();
     }
 
     /**
      * @param query
-     * @return
+     * @return typedQuery for given query.
      */
     public TypedQuery<Relationship> createQuery(
-            CriteriaQuery<Relationship> query) {
+            final CriteriaQuery<Relationship> query) {
         return m_entityManager.createQuery(query);
     }
 
     /**
-     * @return
+     * @return criteria builder based on entityManager.
      */
     public CriteriaBuilder getCriteriaBuilder() {
         return m_entityManager.getCriteriaBuilder();
+    }
+
+    /**
+     * Begins transaction.
+     */
+    public void beginTransaction() {
+        if (!m_transaction.isActive()) {
+            m_transaction.begin();
+        }
+    }
+
+    /**
+     * Commits started transaction.
+     */
+    public void commitTransaction() {
+        m_transaction.commit();
     }
 
     /**
@@ -119,19 +141,5 @@ public class EntityManagerUtil {
      */
     private void persist(final Object object) {
         m_entityManager.persist(object);
-    }
-
-    /**
-     * Begins transaction.
-     */
-    private void beginTransaction() {
-        m_transaction.begin();
-    }
-
-    /**
-     * Commits started transaction.
-     */
-    private void commitTransaction() {
-        m_transaction.commit();
     }
 }
