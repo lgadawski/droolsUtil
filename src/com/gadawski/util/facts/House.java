@@ -1,5 +1,6 @@
 package com.gadawski.util.facts;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
@@ -15,8 +16,12 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "HOUSES")
-public class House {
+public class House implements Serializable{
 	/**
+     * Serial UID.
+     */
+    private static final long serialVersionUID = 1L;
+    /**
 	 * Min house price.
 	 */
 	public static final float sMIN_PRICE = 50000;

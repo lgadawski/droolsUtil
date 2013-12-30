@@ -1,5 +1,6 @@
 package com.gadawski.util.facts;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +21,15 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "RELATIONSHIPS")
-public class Relationship {
+public class Relationship implements Serializable{
+    /**
+     * Serial UID.
+     */
+    private static final long serialVersionUID = 1L;
     /**
      * Counts number of objects in tuple.
      */
-    private int m_numberOfObjectsInTuple = 0;
+    private transient int m_numberOfObjectsInTuple = 0;
     /**
      * Entity ID.
      */
@@ -54,7 +59,7 @@ public class Relationship {
      * 
      */
     // TODO get string name of fields
-    @Column(name = "JoinNode_ID", nullable = false)
+    @Column(name = "JoinNode_ID")//, nullable = false)
     private Long joinNode_ID;
 
     /**

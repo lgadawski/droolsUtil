@@ -1,5 +1,6 @@
 package com.gadawski.util.facts;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
@@ -17,8 +18,8 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "CUSTOMERS")
-public class Customer {
-	/**
+public class Customer implements Serializable{
+    /**
 	 * Min age for person.
 	 */
 	public static final int sMIN_AGE = 12;
@@ -42,6 +43,10 @@ public class Customer {
 	 * Max cash value for person.
 	 */
 	public static final float sMAX_CASH = 500000;
+	/**
+	 * Serial UID.
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Entity id.
 	 */

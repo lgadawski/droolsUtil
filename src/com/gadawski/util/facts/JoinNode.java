@@ -17,7 +17,7 @@ public class JoinNode implements Serializable {
     /**
      * Serial version UID.
      */
-    private static final long serialVersionUID = 1249482829577151624L;
+    private static final long serialVersionUID = 1L;
     /**
      * Entity ID.
      */
