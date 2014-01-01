@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -51,7 +52,8 @@ public class Customer implements Serializable{
 	 * Entity id.
 	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cust_seq")
+    @SequenceGenerator(name="cust_seq", sequenceName="cust_seq", allocationSize=500)
 	@Column(name = "CustomerID", unique = true, updatable = false, nullable = false)
 	private Long customerID;
 	/**

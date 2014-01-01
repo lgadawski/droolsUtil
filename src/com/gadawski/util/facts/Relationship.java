@@ -11,7 +11,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Index;
 
 /**
  * Relationship class is responsible for storing information about tuple.
@@ -21,7 +24,11 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "RELATIONSHIPS")
-public class Relationship implements Serializable{
+//@NamedQueries({
+//    @NamedQuery(name = "Relatanshiops.findByJoinNodeId", query = "SELECT (*) FROM RELATIONSHIPS WHERE JOINNODE_ID = :joinNodeId") })
+// @Cacheable(value = true)
+//@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+public class Relationship implements Serializable {
     /**
      * Serial UID.
      */
@@ -34,32 +41,38 @@ public class Relationship implements Serializable{
      * Entity ID.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rel_seq")
+    @SequenceGenerator(name = "rel_seq", sequenceName = "rel_seq", allocationSize = 500)
     @Column(name = "Relationship_ID", unique = true, updatable = false, nullable = false)
     private Long relationshipID;
     /**
      * Customer ID.
      */
     @ManyToOne
+    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Customer_ID")
     private Customer customer;
     /**
      * Car ID.
      */
     @ManyToOne
+    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Car_ID")
     private Car car;
     /**
      * House ID.
      */
     @ManyToOne
+    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "House_ID")
     private House house;
     /**
      * 
      */
     // TODO get string name of fields
-    @Column(name = "JoinNode_ID")//, nullable = false)
+    @Column(name = "JoinNode_ID")
+    //consider using idx here, many inserts less queries
+    @Index(name="joinNodeIdIdx")
     private Long joinNode_ID;
 
     /**

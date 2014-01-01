@@ -16,10 +16,11 @@ import com.gadawski.util.facts.Relationship;
  * Gives access to EntityManagerFactory which controls connection to the db,
  * also gives access to EntityManager instances.
  * 
- * @author l.gadawski
+ * @author l.gadawski@gmail.com
  * 
  */
 public class EntityManagerUtil {
+    private static final String PERSISTENCE_UNIT_NAME = "hsqldb-ds";
     /**
      * Instance of {@link EntityManagerUtil}.
      */
@@ -27,8 +28,7 @@ public class EntityManagerUtil {
     /**
      * Only one instance of entity manager factory.
      */
-    private static EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
-            .createEntityManagerFactory("hsqldb-ds");
+    private static EntityManagerFactory ENTITY_MANAGER_FACTORY;
     /**
      * Counter for releasing resources.
      */
@@ -46,8 +46,7 @@ public class EntityManagerUtil {
      * Creates entity manager and gets transaction for session.
      */
     private EntityManagerUtil() {
-        m_entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
-        m_transaction = m_entityManager.getTransaction();
+        createEMandInitilizeTransaction();
     }
 
     /**
@@ -58,6 +57,22 @@ public class EntityManagerUtil {
             INSTANCE = new EntityManagerUtil();
         }
         return INSTANCE;
+    }
+
+    /**
+     * Creates new entity manager and initializes transaction.
+     */
+    public void createEMandInitilizeTransaction() {
+        createEntityManager();
+        m_transaction = getTransaction();
+    }
+
+    /**
+     * Creates entity manager.
+     */
+    public void createEntityManager() {
+        createEntityManagerFactory();
+        m_entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
     }
 
     /**
@@ -94,11 +109,10 @@ public class EntityManagerUtil {
     }
 
     /**
-     * Flushes and clears entity manager.
+     * Flushes entity manager.
      */
-    public void flushAndClear() {
+    public void flush() {
         m_entityManager.flush();
-        m_entityManager.clear();
     }
 
     /**
@@ -134,6 +148,42 @@ public class EntityManagerUtil {
     }
 
     /**
+     * @return - true if entity manager is opened, otherwise - false.
+     */
+    public boolean isOpen() {
+        return m_entityManager.isOpen();
+    }
+
+    /**
+     * Truncates all tables.
+     */
+    // TODO get sqlexception, has to be fixed!
+    @Deprecated
+    public void cleanup() {
+        if (!isOpen()) {
+            createEMandInitilizeTransaction();
+        }
+        beginTransaction();
+        m_entityManager.createNativeQuery("truncate table customers")
+                .executeUpdate();
+        m_entityManager.createNativeQuery("truncate table cars")
+                .executeUpdate();
+        m_entityManager.createNativeQuery("truncate table houses")
+                .executeUpdate();
+        m_entityManager.createNativeQuery("truncate table relationships")
+                .executeUpdate();
+        commitTransaction();
+    }
+
+    /**
+     * Creates new {@link EntityManagerFactory} for persistence unit.
+     */
+    private static void createEntityManagerFactory() {
+        ENTITY_MANAGER_FACTORY = Persistence
+                .createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+    }
+
+    /**
      * Persist object to db. Locally it has to be used with EntityTransaction.
      * 
      * @param object
@@ -141,5 +191,19 @@ public class EntityManagerUtil {
      */
     private void persist(final Object object) {
         m_entityManager.persist(object);
+    }
+
+    /**
+     * @return - transaction for entity manager.
+     */
+    private EntityTransaction getTransaction() {
+        return m_entityManager.getTransaction();
+    }
+
+    /**
+     * @return em
+     */
+    public EntityManager getEntityManager() {
+        return m_entityManager;
     }
 }
