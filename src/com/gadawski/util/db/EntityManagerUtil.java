@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -92,10 +93,23 @@ public class EntityManagerUtil {
      */
     public void saveObject(final Object object) {
         persist(object);
-        if ((EntityManagerUtil.COUNTER.getAndIncrement() % 10000) == 0) {
+        if ((EntityManagerUtil.COUNTER.getAndIncrement() % 5000) == 0) {
             commitTransaction();
+            clear();
             beginTransaction();
         }
+    }
+
+    /**
+     * Remove the entity instance.
+     * 
+     * @param object
+     *            to remove.
+     */
+    public void remove(Object object) {
+        beginTransaction();
+        m_entityManager.remove(object);
+        commitTransaction();
     }
 
     /**
@@ -144,7 +158,9 @@ public class EntityManagerUtil {
      * Commits started transaction.
      */
     public void commitTransaction() {
-        m_transaction.commit();
+        if (m_transaction.isActive()) {
+            m_transaction.commit();
+        }
     }
 
     /**
@@ -160,9 +176,7 @@ public class EntityManagerUtil {
     // TODO get sqlexception, has to be fixed!
     @Deprecated
     public void cleanup() {
-        if (!isOpen()) {
-            createEMandInitilizeTransaction();
-        }
+        checkIfEMisOpen();
         beginTransaction();
         m_entityManager.createNativeQuery("truncate table customers")
                 .executeUpdate();
@@ -173,6 +187,49 @@ public class EntityManagerUtil {
         m_entityManager.createNativeQuery("truncate table relationships")
                 .executeUpdate();
         commitTransaction();
+    }
+
+    /**
+     * Clear the persistence context, causing all managed entities to become
+     * detached. Changes made to entities that have not been flushed to the
+     * database will not be persisted.
+     */
+    public void clear() {
+        m_entityManager.clear();
+    }
+
+    /**
+     * @return em
+     */
+    public EntityManager getEntityManager() {
+        return m_entityManager;
+    }
+
+    /**
+     * Truncates given table.
+     * 
+     * @param tableName
+     *            table name to truncate.
+     */
+    public void truncateTable(String tableName) {
+        checkIfEMisOpen();
+        beginTransaction();
+        m_entityManager.createNativeQuery("truncate table " + tableName)
+                .executeUpdate();
+        commitTransaction();
+    }
+
+    /**
+     * Creates query to db that counts total number of rows in table.
+     * 
+     * @param entityName
+     */
+    public int getTotalNumberOfRows(String entityName) {
+        checkIfEMisOpen();
+        String queryName = "SELECT count(*) FROM " + entityName;
+        Query query = m_entityManager.createQuery(queryName);
+        // TODO refine this!
+        return Integer.valueOf(query.getSingleResult().toString());
     }
 
     /**
@@ -201,9 +258,12 @@ public class EntityManagerUtil {
     }
 
     /**
-     * @return em
+     * Checks if EntityManager is open, otherwise creates new EM and initlizes
+     * new transaction.
      */
-    public EntityManager getEntityManager() {
-        return m_entityManager;
+    private void checkIfEMisOpen() {
+        if (!isOpen()) {
+            createEMandInitilizeTransaction();
+        }
     }
 }

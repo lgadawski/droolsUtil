@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
@@ -24,10 +26,11 @@ import org.hibernate.annotations.Index;
  */
 @Entity
 @Table(name = "RELATIONSHIPS")
-//@NamedQueries({
-//    @NamedQuery(name = "Relatanshiops.findByJoinNodeId", query = "SELECT (*) FROM RELATIONSHIPS WHERE JOINNODE_ID = :joinNodeId") })
+// @NamedQueries({
+// @NamedQuery(name = "Relatanshiops.findByJoinNodeId", query =
+// "SELECT (*) FROM RELATIONSHIPS WHERE JOINNODE_ID = :joinNodeId") })
 // @Cacheable(value = true)
-//@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+// @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class Relationship implements Serializable {
     /**
      * Serial UID.
@@ -36,7 +39,8 @@ public class Relationship implements Serializable {
     /**
      * Counts number of objects in tuple.
      */
-    private transient int m_numberOfObjectsInTuple = 0;
+    @Transient
+    private int m_numberOfObjectsInTuple = 0;
     /**
      * Entity ID.
      */
@@ -48,21 +52,21 @@ public class Relationship implements Serializable {
     /**
      * Customer ID.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Customer_ID")
     private Customer customer;
     /**
      * Car ID.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Car_ID")
     private Car car;
     /**
      * House ID.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "House_ID")
     private House house;
@@ -70,9 +74,9 @@ public class Relationship implements Serializable {
      * 
      */
     // TODO get string name of fields
+    // consider using idx here, many inserts less queries
     @Column(name = "JoinNode_ID")
-    //consider using idx here, many inserts less queries
-    @Index(name="joinNodeIdIdx")
+    @Index(name = "joinNodeIdIdx")
     private Long joinNode_ID;
 
     /**
@@ -221,7 +225,7 @@ public class Relationship implements Serializable {
      * @return list of objects in relationship.
      */
     public List<Object> getObjects() {
-        List<Object> objects = new ArrayList<Object>();
+        final List<Object> objects = new ArrayList<Object>();
         if (customer != null) {
             objects.add(customer);
         }
@@ -240,7 +244,18 @@ public class Relationship implements Serializable {
      * @return number of object types in relationship.
      */
     public int getNoObjectsInTuple() {
-        return m_numberOfObjectsInTuple;
+        int counter = 0;
+        if (customer != null) {
+            ++counter;
+        }
+        if (car != null) {
+            ++counter;
+        }
+        if (house != null) {
+            ++counter;
+        }
+        return counter;
+        // return m_numberOfObjectsInTuple;
     }
 
     /**
