@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "CUSTOMERS")
+@Table(name = "A_CUSTOMERS")
 public class Customer implements Serializable{
     /**
 	 * Min age for person.
@@ -55,7 +55,7 @@ public class Customer implements Serializable{
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cust_seq")
     @SequenceGenerator(name="cust_seq", sequenceName="cust_seq", allocationSize=500)
 	@Column(name = "CustomerID", unique = true, updatable = false, nullable = false)
-	private Long customerID;
+	private long customerID;
 	/**
 	 * Name of person, in files represents as sequence integer values.
 	 */

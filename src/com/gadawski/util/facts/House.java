@@ -16,7 +16,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "HOUSES")
+@Table(name = "A_HOUSES")
 public class House implements Serializable{
 	/**
      * Serial UID.
@@ -45,7 +45,7 @@ public class House implements Serializable{
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="hou_seq")
     @SequenceGenerator(name="hou_seq", sequenceName="hou_seq", allocationSize=500)
 	@Column(name = "HouseID", unique = true, updatable = false, nullable = false)
-	private Long houseID;
+	private long houseID;
 	/**
 	 * House name.
 	 */

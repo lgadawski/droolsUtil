@@ -23,7 +23,7 @@ public class JoinNode implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "JoinNodeID", unique = true, updatable = false, nullable = false)
-    private Long joinNodeID;
+    private long joinNodeID;
 
     /**
      * For persistance purposes.

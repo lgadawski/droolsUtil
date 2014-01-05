@@ -25,7 +25,7 @@ import org.hibernate.annotations.Index;
  * 
  */
 @Entity
-@Table(name = "RELATIONSHIPS")
+@Table(name = "A_RELATIONSHIPS")
 // @NamedQueries({
 // @NamedQuery(name = "Relatanshiops.findByJoinNodeId", query =
 // "SELECT (*) FROM RELATIONSHIPS WHERE JOINNODE_ID = :joinNodeId") })
@@ -48,7 +48,7 @@ public class Relationship implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rel_seq")
     @SequenceGenerator(name = "rel_seq", sequenceName = "rel_seq", allocationSize = 500)
     @Column(name = "Relationship_ID", unique = true, updatable = false, nullable = false)
-    private Long relationshipID;
+    private long relationshipID;
     /**
      * Customer ID.
      */
@@ -77,7 +77,7 @@ public class Relationship implements Serializable {
     // consider using idx here, many inserts less queries
     @Column(name = "JoinNode_ID")
     @Index(name = "joinNodeIdIdx")
-    private Long joinNode_ID;
+    private long joinNode_ID;
 
     /**
      * For persistence purpose.
@@ -168,58 +168,6 @@ public class Relationship implements Serializable {
         incrementNumberOfObjects();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((car == null) ? 0 : car.hashCode());
-        result = prime * result
-                + ((customer == null) ? 0 : customer.hashCode());
-        result = prime * result + ((house == null) ? 0 : house.hashCode());
-        result = prime * result
-                + ((joinNode_ID == null) ? 0 : joinNode_ID.hashCode());
-        result = prime * result
-                + ((relationshipID == null) ? 0 : relationshipID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final Relationship other = (Relationship) obj;
-        if (car == null) {
-            if (other.car != null)
-                return false;
-        } else if (!car.equals(other.car))
-            return false;
-        if (customer == null) {
-            if (other.customer != null)
-                return false;
-        } else if (!customer.equals(other.customer))
-            return false;
-        if (house == null) {
-            if (other.house != null)
-                return false;
-        } else if (!house.equals(other.house))
-            return false;
-        if (joinNode_ID == null) {
-            if (other.joinNode_ID != null)
-                return false;
-        } else if (!joinNode_ID.equals(other.joinNode_ID))
-            return false;
-        if (relationshipID == null) {
-            if (other.relationshipID != null)
-                return false;
-        } else if (!relationshipID.equals(other.relationshipID))
-            return false;
-        return true;
-    }
-
     /**
      * 
      * @return list of objects in relationship.
@@ -256,6 +204,57 @@ public class Relationship implements Serializable {
         }
         return counter;
         // return m_numberOfObjectsInTuple;
+    }
+
+    /**
+     * @return the relationshipID
+     */
+    public Long getRelationshipID() {
+        return relationshipID;
+    }
+
+    /**
+     * @param relationshipID
+     *            the relationshipID to set
+     */
+    public void setRelationshipID(Long relationshipID) {
+        this.relationshipID = relationshipID;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (joinNode_ID ^ (joinNode_ID >>> 32));
+        result = prime * result
+                + (int) (relationshipID ^ (relationshipID >>> 32));
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Relationship other = (Relationship) obj;
+        if (joinNode_ID != other.joinNode_ID)
+            return false;
+        if (relationshipID != other.relationshipID)
+            return false;
+        return true;
     }
 
     /**

@@ -16,7 +16,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "CARS")
+@Table(name = "A_CARS")
 public class Car implements Serializable {
     /**
      * Min car price.
@@ -37,7 +37,7 @@ public class Car implements Serializable {
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="car_seq")
     @SequenceGenerator(name="car_seq", sequenceName="car_seq", allocationSize=500)
     @Column(name = "CarID", unique = true, updatable = false, nullable = false)
-    private Long carID;
+    private long carID;
     /**
      * Car name.
      */
