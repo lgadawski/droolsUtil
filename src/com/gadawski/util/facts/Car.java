@@ -34,8 +34,8 @@ public class Car implements Serializable {
      * Entity id.
      */
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="car_seq")
-    @SequenceGenerator(name="car_seq", sequenceName="car_seq", allocationSize=500)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "car_seq")
+    @SequenceGenerator(name = "car_seq", sequenceName = "car_seq", allocationSize = 500)
     @Column(name = "CarID", unique = true, updatable = false, nullable = false)
     private long carID;
     /**
@@ -51,7 +51,7 @@ public class Car implements Serializable {
     /**
      * For persistence.
      */
-    public Car() {
+    Car() {
     }
 
     /**
@@ -62,9 +62,9 @@ public class Car implements Serializable {
      * @param price
      *            - car price.
      */
-    public Car(String name, BigDecimal price) {
-        this.setName(name);
-        this.setPrice(price);
+    public Car(final String name, final BigDecimal price) {
+        this.name = name;
+        this.price = price;
     }
 
     /**
@@ -73,7 +73,7 @@ public class Car implements Serializable {
      * @return example car object.
      */
     public static Car createExampleObject() {
-        Car car = new Car();
+        final Car car = new Car();
         car.setName("volvo");
         car.setPrice(BigDecimal.valueOf(1324));
         return car;
@@ -94,14 +94,14 @@ public class Car implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Car other = (Car) obj;
+        final Car other = (Car) obj;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -125,7 +125,7 @@ public class Car implements Serializable {
     /**
      * @param name
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -139,21 +139,21 @@ public class Car implements Serializable {
     /**
      * @param price
      */
-    public void setPrice(BigDecimal price) {
+    public void setPrice(final BigDecimal price) {
         this.price = price;
     }
 
     /**
      * @return
      */
-    public Long getId() {
+    public long getId() {
         return carID;
     }
 
     /**
      * @param id
      */
-    public void setId(Long id) {
+    public void setId(final long id) {
         this.carID = id;
     }
 

@@ -11,6 +11,9 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -21,6 +24,13 @@ import com.gadawski.util.facts.Relationship;
  * 
  */
 public class EntityManagerUtil {
+    /**
+     * "truncate table "
+     */
+    public static final String TRUNCATE_TABLE = "truncate table ";
+    /**
+     * Name of persistence unit.
+     */
     private static final String PERSISTENCE_UNIT_NAME = "hsqldb-ds";
     /**
      * Instance of {@link EntityManagerUtil}.
@@ -30,6 +40,11 @@ public class EntityManagerUtil {
      * Only one instance of entity manager factory.
      */
     private static EntityManagerFactory ENTITY_MANAGER_FACTORY;
+    /**
+     * Limit indicates after how many operations perform commit. Should be same
+     * as hibernate.batch_size in persistence.xml.
+     */
+    public static final int BATCH_SIZE = 1000;
     /**
      * Counter for releasing resources.
      */
@@ -93,7 +108,7 @@ public class EntityManagerUtil {
      */
     public void saveObject(final Object object) {
         persist(object);
-        if ((EntityManagerUtil.COUNTER.getAndIncrement() % 5000) == 0) {
+        if ((EntityManagerUtil.COUNTER.getAndIncrement() % BATCH_SIZE) == 0) {
             commitTransaction();
             clear();
             beginTransaction();
@@ -106,7 +121,7 @@ public class EntityManagerUtil {
      * @param object
      *            to remove.
      */
-    public void remove(Object object) {
+    public void remove(final Object object) {
         beginTransaction();
         m_entityManager.remove(object);
         commitTransaction();
@@ -211,10 +226,10 @@ public class EntityManagerUtil {
      * @param tableName
      *            table name to truncate.
      */
-    public void truncateTable(String tableName) {
+    public void truncateTable(final String tableName) {
         checkIfEMisOpen();
         beginTransaction();
-        m_entityManager.createNativeQuery("truncate table " + tableName)
+        m_entityManager.createNativeQuery(TRUNCATE_TABLE + tableName)
                 .executeUpdate();
         commitTransaction();
     }
@@ -224,10 +239,10 @@ public class EntityManagerUtil {
      * 
      * @param entityName
      */
-    public int getTotalNumberOfRows(String entityName) {
+    public int getTotalNumberOfRows(final String entityName) {
         checkIfEMisOpen();
-        String queryName = "SELECT count(*) FROM " + entityName;
-        Query query = m_entityManager.createQuery(queryName);
+        final String queryName = "SELECT count(*) FROM " + entityName;
+        final Query query = m_entityManager.createQuery(queryName);
         // TODO refine this!
         return Integer.valueOf(query.getSingleResult().toString());
     }
@@ -265,5 +280,32 @@ public class EntityManagerUtil {
         if (!isOpen()) {
             createEMandInitilizeTransaction();
         }
+    }
+
+    /**
+     * Unwraps hibernate's session from {@link EntityManager} and opens
+     * {@link Session}.
+     * 
+     * @return {@link Session} based on {@link EntityManager}.
+     */
+    public Session openSession() {
+        final Session session = m_entityManager.unwrap(Session.class);
+        final SessionFactory sessionFactory = session.getSessionFactory();
+        return sessionFactory.openSession();
+    }
+
+    /**
+     * Create an instance of TypedQuery for executing a Java Persistence query
+     * language named query. The select list of the query must contain only a
+     * single item, which must be assignable to the type specified by the
+     * resultClass argument.
+     * 
+     * @param sqlString
+     * @param resultClass
+     * @return the new query instance.
+     */
+    public Query createNamedQuery(final String sqlString,
+            final Class<Relationship> resultClass) {
+        return m_entityManager.createNamedQuery(sqlString, resultClass);
     }
 }

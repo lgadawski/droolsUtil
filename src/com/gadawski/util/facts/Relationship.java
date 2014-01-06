@@ -12,9 +12,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
@@ -26,9 +27,8 @@ import org.hibernate.annotations.Index;
  */
 @Entity
 @Table(name = "A_RELATIONSHIPS")
+@NamedQueries({ @NamedQuery(name = "Relationship.findRelationshipByJoinNodeId", query = "FROM Relationship WHERE joinNode_ID = :nodeId") })
 // @NamedQueries({
-// @NamedQuery(name = "Relatanshiops.findByJoinNodeId", query =
-// "SELECT (*) FROM RELATIONSHIPS WHERE JOINNODE_ID = :joinNodeId") })
 // @Cacheable(value = true)
 // @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class Relationship implements Serializable {
@@ -37,10 +37,14 @@ public class Relationship implements Serializable {
      */
     private static final long serialVersionUID = 1L;
     /**
-     * Counts number of objects in tuple.
+     * Named query name defined for {@link Relationship}, selects relationships
+     * where joinNode_Id = :nodeId
      */
-    @Transient
-    private int m_numberOfObjectsInTuple = 0;
+    public static final String FIND_RELS_BY_JOINNODE_ID = "Relationship.findRelationshipByJoinNodeId";
+    /**
+     * Parameter name used for queries.
+     */
+    public static final String NODE_ID_TXT = "nodeId";
     /**
      * Entity ID.
      */
@@ -53,29 +57,27 @@ public class Relationship implements Serializable {
      * Customer ID.
      */
     @ManyToOne(fetch = FetchType.EAGER)
-    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Customer_ID")
+//    @Index(name = "customer_id_idx")
     private Customer customer;
     /**
      * Car ID.
      */
     @ManyToOne(fetch = FetchType.EAGER)
-    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "Car_ID")
+//    @Index(name = "car_id_idx")
     private Car car;
     /**
      * House ID.
      */
     @ManyToOne(fetch = FetchType.EAGER)
-    // (cascade=CascadeType.PERSIST)
     @JoinColumn(name = "House_ID")
+//    @Index(name = "car_id_idx")
     private House house;
     /**
      * 
      */
-    // TODO get string name of fields
-    // consider using idx here, many inserts less queries
-    @Column(name = "JoinNode_ID")
+    @Column(name = "joinNode_ID")
     @Index(name = "joinNodeIdIdx")
     private long joinNode_ID;
 
@@ -85,8 +87,8 @@ public class Relationship implements Serializable {
     public Relationship() {
     }
 
-    public Relationship(final int joinNodeID, final Object object) {
-        this.joinNode_ID = (long) joinNodeID;
+    public Relationship(final long joinNodeID, final Object object) {
+        this.joinNode_ID = joinNodeID;
         setObject(object);
     }
 
@@ -97,18 +99,18 @@ public class Relationship implements Serializable {
      */
     public void setObject(final Object object) {
         if (object instanceof Car) {
-            setCar((Car) object);
+            car = (Car) object;
         } else if (object instanceof Customer) {
-            setCustomer((Customer) object);
+            customer = (Customer) object;
         } else if (object instanceof House) {
-            setHouse((House) object);
+            house = (House) object;
         }
     }
 
     /**
      * @return the joinNodeID
      */
-    public Long getJoinNode() {
+    public long getJoinNode() {
         return joinNode_ID;
     }
 
@@ -116,7 +118,7 @@ public class Relationship implements Serializable {
      * @param joinNodeID
      *            the joinNodeID to set
      */
-    public void setJoinNode(final Long joinNodeID) {
+    public void setJoinNode(final long joinNodeID) {
         this.joinNode_ID = joinNodeID;
     }
 
@@ -133,7 +135,6 @@ public class Relationship implements Serializable {
      */
     public void setCustomer(final Customer customerID) {
         this.customer = customerID;
-        incrementNumberOfObjects();
     }
 
     /**
@@ -149,7 +150,6 @@ public class Relationship implements Serializable {
      */
     public void setCar(final Car carID) {
         this.car = carID;
-        incrementNumberOfObjects();
     }
 
     /**
@@ -165,7 +165,6 @@ public class Relationship implements Serializable {
      */
     public void setHouse(final House houseID) {
         this.house = houseID;
-        incrementNumberOfObjects();
     }
 
     /**
@@ -203,13 +202,12 @@ public class Relationship implements Serializable {
             ++counter;
         }
         return counter;
-        // return m_numberOfObjectsInTuple;
     }
 
     /**
      * @return the relationshipID
      */
-    public Long getRelationshipID() {
+    public long getRelationshipID() {
         return relationshipID;
     }
 
@@ -217,7 +215,7 @@ public class Relationship implements Serializable {
      * @param relationshipID
      *            the relationshipID to set
      */
-    public void setRelationshipID(Long relationshipID) {
+    public void setRelationshipID(final Long relationshipID) {
         this.relationshipID = relationshipID;
     }
 
@@ -226,7 +224,6 @@ public class Relationship implements Serializable {
      * 
      * @see java.lang.Object#hashCode()
      */
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -241,26 +238,18 @@ public class Relationship implements Serializable {
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Relationship other = (Relationship) obj;
+        final Relationship other = (Relationship) obj;
         if (joinNode_ID != other.joinNode_ID)
             return false;
         if (relationshipID != other.relationshipID)
             return false;
         return true;
-    }
-
-    /**
-     * Increments number of objects in tuple counter.
-     */
-    private void incrementNumberOfObjects() {
-        m_numberOfObjectsInTuple++;
     }
 }
