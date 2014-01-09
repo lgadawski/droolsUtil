@@ -58,21 +58,21 @@ public class Relationship implements Serializable {
      */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Customer_ID")
-//    @Index(name = "customer_id_idx")
+    @Index(name = "customer_id_idx")
     private Customer customer;
     /**
      * Car ID.
      */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Car_ID")
-//    @Index(name = "car_id_idx")
+    @Index(name = "car_id_idx")
     private Car car;
     /**
      * House ID.
      */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "House_ID")
-//    @Index(name = "car_id_idx")
+    @Index(name = "car_id_idx")
     private House house;
     /**
      * 
