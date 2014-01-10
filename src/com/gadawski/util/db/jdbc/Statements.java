@@ -26,7 +26,7 @@ class Statements {
     /**
      * 
      */
-    static final String INSERT_STATEMENT = "INSERT into A_AGENDA_ITEMS "
+    static final String INSERT_INTO_A_I_STATEMENT = "INSERT into A_AGENDA_ITEMS "
             + "(agenda_item_id, agenda_object) values (a_agenda_items_seq.NEXTVAL, ?)";
     /**
      * 

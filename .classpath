@@ -16,5 +16,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="ucp.jar"/>
+	<classpathentry kind="lib" path="ucpdemos.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

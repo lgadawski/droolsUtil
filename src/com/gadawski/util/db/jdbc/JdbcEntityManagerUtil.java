@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import oracle.jdbc.pool.OracleDataSource;
+import oracle.ucp.jdbc.PoolDataSource;
+import oracle.ucp.jdbc.PoolDataSourceFactory;
 
 /**
  * Utility class that uses JDBC connections to persist data.
@@ -25,13 +28,26 @@ public class JdbcEntityManagerUtil {
     /**
      * 
      */
-    private Connection connection = null;
+    private static final String CONNECTION_FACTORY_CLASS_NAME = "oracle.jdbc.pool.OracleDataSource";
+    /**
+     * Initial pool size
+     */
+    private static final int POOL_SIZE = 5;
+    /**
+     * 
+     */
+    private final PoolDataSource m_poolDataSource;
 
     /**
      * Private constructor to block creating objects.
      */
     private JdbcEntityManagerUtil() {
-
+        m_poolDataSource = PoolDataSourceFactory.getPoolDataSource();
+        try {
+            setConnectionProps();
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -66,8 +82,8 @@ public class JdbcEntityManagerUtil {
      *            to be saved.
      */
     public void saveObject(final Object object) {
-        initilizeConnection();
         try {
+            final Connection connection = getConnection();
             final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
             final ObjectOutputStream objOutputStream = new ObjectOutputStream(
                     byteOutputStream);
@@ -78,13 +94,14 @@ public class JdbcEntityManagerUtil {
             final byte[] data = byteOutputStream.toByteArray();
 
             final PreparedStatement statement = connection
-                    .prepareStatement(Statements.INSERT_STATEMENT);
+                    .prepareStatement(Statements.INSERT_INTO_A_I_STATEMENT);
             statement.setObject(1, null); // set agenda_item_id null to be
                                           // generated from seq
             statement.setObject(1, data);
             statement.executeUpdate();
+            statement.close();
             connection.commit();
-            // closeConnection();
+            closeConnection(connection);
         } catch (final IOException e) {
             e.printStackTrace();
         } catch (final SQLException e) {
@@ -97,8 +114,9 @@ public class JdbcEntityManagerUtil {
      * @return
      */
     public Object getObject(final int rowNum) {
-        initilizeConnection();
+        Connection connection = null;
         try {
+            connection = getConnection();
             final PreparedStatement statement = connection
                     .prepareStatement(Statements.SELECT_ROW + rowNum);
             final ResultSet resultSet = statement.executeQuery();
@@ -110,7 +128,8 @@ public class JdbcEntityManagerUtil {
 
                 final Object object = objectInputStream.readObject();
                 objectInputStream.close();
-                // closeConnection();
+                statement.close();
+                closeConnection(connection);
                 return object;
             }
         } catch (final SQLException e) {
@@ -120,37 +139,29 @@ public class JdbcEntityManagerUtil {
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
-        closeConnection();
         return null;
-    }
-
-    /**
-     * @param item
-     */
-    public void remove(final Object object) {
-        // TODO Auto-generated method stub
-
     }
 
     /**
      * @return
      */
     public int getTotalNumberOfRows() {
-        initilizeConnection();
-        PreparedStatement statement;
+        int totalCount = 0;
         try {
-            statement = connection
+            final Connection connection = getConnection();
+            final PreparedStatement statement = connection
                     .prepareStatement(Statements.COUNT_TOTAL_NUMBER_OF_AGENDA_ITEMS);
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                return resultSet.getInt(Statements.COUNT_STAR);
+                totalCount = resultSet.getInt(Statements.COUNT_STAR);
             }
-            connection.commit();
+            resultSet.close();
+            statement.close();
+            closeConnection(connection);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
-        // closeConnection();
-        return 0;
+        return totalCount;
     }
 
     /**
@@ -167,16 +178,16 @@ public class JdbcEntityManagerUtil {
      *            statement to be execute.
      */
     private void executeStatement(final String stmt) {
-        initilizeConnection();
         try {
+            final Connection connection = getConnection();
             final PreparedStatement statement = connection
                     .prepareStatement(stmt);
             statement.execute();
-            connection.commit();
+            statement.close();
+            closeConnection(connection);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
-        // closeConnection();
     }
 
     /**
@@ -187,35 +198,41 @@ public class JdbcEntityManagerUtil {
     }
 
     /**
-     * Initializes connection.
+     * Get database connection from the datasource.
+     * 
+     * @return {@link Connection} from DataSource.
+     * @throws SQLException
+     *             - if connection cannot be obtained from pool.
      */
-    private void initilizeConnection() {
-        try {
-            Class.forName(JdbcConfigProps.DRIVER_PACKAGE);
-        } catch (final ClassNotFoundException e) {
-            System.out.println("Oracle JDBC driver not found.");
-            e.printStackTrace();
-        }
-        try {
-            connection = DriverManager.getConnection(
-                    JdbcConfigProps.CONNECTION_URL, JdbcConfigProps.USER_NAME,
-                    JdbcConfigProps.PASSWORD);
-        } catch (final SQLException e) {
-            System.out.println("Connection failed.");
-            e.printStackTrace();
-        }
+    private Connection getConnection() throws SQLException {
+        return m_poolDataSource.getConnection();
     }
 
     /**
+     * Sets all {@link OracleDataSource} properties from {@link JdbcConfigProps}
+     * 
+     * 
+     * @throws SQLException
      * 
      */
-    private void closeConnection() {
-        try {
-            connection.close();
-        } catch (final SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    private void setConnectionProps() throws SQLException {
+        m_poolDataSource
+                .setConnectionFactoryClassName(CONNECTION_FACTORY_CLASS_NAME);
+        m_poolDataSource.setURL(JdbcConfigProps.CONNECTION_URL);
+        m_poolDataSource.setUser(JdbcConfigProps.USER_NAME);
+        m_poolDataSource.setPassword(JdbcConfigProps.PASSWORD);
+        m_poolDataSource.setInitialPoolSize(POOL_SIZE);
+    }
+
+    /**
+     * Closes given connection.
+     * 
+     * @throws SQLException
+     *             - if connection cannot be closed.
+     * 
+     */
+    private void closeConnection(final Connection connection) throws SQLException {
+        connection.close();
     }
 
 }
