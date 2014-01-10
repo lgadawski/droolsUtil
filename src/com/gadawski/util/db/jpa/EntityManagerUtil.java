@@ -1,4 +1,4 @@
-package com.gadawski.util.db;
+package com.gadawski.util.db.jpa;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

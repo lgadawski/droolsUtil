@@ -1,4 +1,4 @@
-package com.gadawski.util.db;
+package com.gadawski.util.db.jpa.hibernate;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
