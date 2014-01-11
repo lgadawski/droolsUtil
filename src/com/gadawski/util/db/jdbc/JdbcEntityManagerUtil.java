@@ -32,7 +32,11 @@ public class JdbcEntityManagerUtil {
     /**
      * Initial pool size
      */
-    private static final int POOL_SIZE = 5;
+    private static final int POOL_SIZE = 10;
+    /**
+     * Number of statements that will be cached.
+     */
+    private static final int MAX_STATEMENTS_CACHE = 10;
     /**
      * 
      */
@@ -48,6 +52,7 @@ public class JdbcEntityManagerUtil {
         } catch (final SQLException e) {
             e.printStackTrace();
         }
+        truncateAgendaItems();
     }
 
     /**
@@ -70,6 +75,7 @@ public class JdbcEntityManagerUtil {
     }
 
     /**
+     * Removes AgendaItem from top.
      * @param item
      */
     public void removeNextAgendaItem() {
@@ -100,7 +106,6 @@ public class JdbcEntityManagerUtil {
             statement.setObject(1, data);
             statement.executeUpdate();
             statement.close();
-            connection.commit();
             closeConnection(connection);
         } catch (final IOException e) {
             e.printStackTrace();
@@ -118,7 +123,8 @@ public class JdbcEntityManagerUtil {
         try {
             connection = getConnection();
             final PreparedStatement statement = connection
-                    .prepareStatement(Statements.SELECT_ROW + rowNum);
+                    .prepareStatement(Statements.SELECT_ROW);
+            statement.setInt(1, rowNum);
             final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 final ByteArrayInputStream inputStream = new ByteArrayInputStream(
@@ -222,6 +228,7 @@ public class JdbcEntityManagerUtil {
         m_poolDataSource.setUser(JdbcConfigProps.USER_NAME);
         m_poolDataSource.setPassword(JdbcConfigProps.PASSWORD);
         m_poolDataSource.setInitialPoolSize(POOL_SIZE);
+        m_poolDataSource.setMaxStatements(MAX_STATEMENTS_CACHE);
     }
 
     /**
@@ -231,8 +238,11 @@ public class JdbcEntityManagerUtil {
      *             - if connection cannot be closed.
      * 
      */
-    private void closeConnection(final Connection connection) throws SQLException {
-        connection.close();
+    private void closeConnection(final Connection connection)
+            throws SQLException {
+        if (connection != null) {
+            connection.close();
+        }
     }
 
 }

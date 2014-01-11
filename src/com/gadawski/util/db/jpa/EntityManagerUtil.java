@@ -44,7 +44,7 @@ public class EntityManagerUtil {
      * Limit indicates after how many operations perform commit. Should be same
      * as hibernate.batch_size in persistence.xml.
      */
-    public static final int BATCH_SIZE = 1000;
+    public static final int BATCH_SIZE = 3000;
     /**
      * Counter for releasing resources.
      */

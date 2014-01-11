@@ -31,7 +31,7 @@ class Statements {
     /**
      * 
      */
-    static final String SELECT_ROW = "SELECT * from A_AGENDA_ITEMS where rownum = ";
+    static final String SELECT_ROW = "SELECT * from A_AGENDA_ITEMS where rownum = ?";
 
     /**
      * 
