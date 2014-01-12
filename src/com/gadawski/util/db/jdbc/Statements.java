@@ -6,7 +6,7 @@ package com.gadawski.util.db.jdbc;
  * @author l.gadawski@gmail.com
  * 
  */
-class Statements {
+final class Statements {
     /**
      * 
      */
@@ -37,6 +37,5 @@ class Statements {
      * 
      */
     private Statements() {
-
     }
 }

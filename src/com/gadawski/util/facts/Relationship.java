@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -27,8 +29,8 @@ import org.hibernate.annotations.Index;
  */
 @Entity
 @Table(name = "A_RELATIONSHIPS")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @NamedQueries({ @NamedQuery(name = "Relationship.findRelationshipByJoinNodeId", query = "FROM Relationship WHERE joinNode_ID = :nodeId") })
-// @NamedQueries({
 // @Cacheable(value = true)
 // @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class Relationship implements Serializable {
@@ -110,7 +112,7 @@ public class Relationship implements Serializable {
     /**
      * @return the joinNodeID
      */
-    public long getJoinNode() {
+    public long getJoinNodeId() {
         return joinNode_ID;
     }
 
@@ -118,7 +120,7 @@ public class Relationship implements Serializable {
      * @param joinNodeID
      *            the joinNodeID to set
      */
-    public void setJoinNode(final long joinNodeID) {
+    public void setJoinNodeId(final long joinNodeID) {
         this.joinNode_ID = joinNodeID;
     }
 

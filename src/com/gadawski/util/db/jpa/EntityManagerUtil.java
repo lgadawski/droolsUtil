@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -15,6 +16,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import com.gadawski.util.facts.Relationship;
+import com.gadawski.util.facts.RightRelationship;
 
 /**
  * Gives access to EntityManagerFactory which controls connection to the db,
@@ -89,6 +91,7 @@ public class EntityManagerUtil {
     public void createEntityManager() {
         createEntityManagerFactory();
         m_entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
+        m_entityManager.setFlushMode(FlushModeType.AUTO);
     }
 
     /**
@@ -214,7 +217,7 @@ public class EntityManagerUtil {
     }
 
     /**
-     * @return em
+     * @return {@link EntityManager}
      */
     public EntityManager getEntityManager() {
         return m_entityManager;
@@ -248,7 +251,8 @@ public class EntityManagerUtil {
     }
 
     /**
-     * Creates new {@link EntityManagerFactory} for persistence unit.
+     * Creates new {@link EntityManagerFactory} for persistence unit. Creating
+     * EMF is very expensive, so use this method very carefully.
      */
     private static void createEntityManagerFactory() {
         ENTITY_MANAGER_FACTORY = Persistence
@@ -262,7 +266,11 @@ public class EntityManagerUtil {
      *            to be saved to db.
      */
     private void persist(final Object object) {
-        m_entityManager.persist(object);
+        try {
+            m_entityManager.persist(object);
+        } catch (final IllegalArgumentException e) {
+            System.out.println("Not persistable object!");
+        }
     }
 
     /**
@@ -306,6 +314,21 @@ public class EntityManagerUtil {
      */
     public Query createNamedQuery(final String sqlString,
             final Class<Relationship> resultClass) {
+        return m_entityManager.createNamedQuery(sqlString, resultClass);
+    }
+
+    /**
+     * Create an instance of TypedQuery for executing a Java Persistence query
+     * language named query. The select list of the query must contain only a
+     * single item, which must be assignable to the type specified by the
+     * resultClass argument.
+     * 
+     * @param sqlString
+     * @param resultClass
+     * @return the new query instance.
+     */
+    public Query createNamedQueryForRightRelationships(final String sqlString,
+            final Class<RightRelationship> resultClass) {
         return m_entityManager.createNamedQuery(sqlString, resultClass);
     }
 }
