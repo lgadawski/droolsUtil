@@ -125,7 +125,7 @@ public class JdbcAgendaItemManagerUtil {
      * @param leftTuple
      */
     public void saveLeftTuple(final int sinkId, final Object leftTuple) {
-        saveTuple(sinkId, leftTuple);
+        saveTuple(sinkId, leftTuple, Statements.INSERT_INTO_LEFT_TUPLES);
 
     }
 
@@ -134,7 +134,7 @@ public class JdbcAgendaItemManagerUtil {
      * @param rightTuple
      */
     public void saveRightTuple(final int sinkId, final Object rightTuple) {
-        saveTuple(sinkId, rightTuple);
+        saveTuple(sinkId, rightTuple, Statements.INSERT_INTO_RIGHT_TUPLES);
     }
 
     /**
@@ -254,8 +254,9 @@ public class JdbcAgendaItemManagerUtil {
     /**
      * @param sinkId
      * @param tuple
+     * @param insertStmt 
      */
-    private void saveTuple(final int sinkId, final Object tuple) {
+    private void saveTuple(final int sinkId, final Object tuple, String insertStmt) {
         try {
             final Connection connection = getConnection();
             final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
@@ -267,7 +268,7 @@ public class JdbcAgendaItemManagerUtil {
 
             final byte[] data = byteOutputStream.toByteArray();
             final PreparedStatement statement = connection
-                    .prepareStatement(Statements.INSERT_INTO_LEFT_TUPLES);
+                    .prepareStatement(insertStmt);
             statement.setInt(1, sinkId);
             statement.setObject(2, data);
             statement.executeUpdate();

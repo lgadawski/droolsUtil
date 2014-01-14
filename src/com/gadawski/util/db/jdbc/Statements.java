@@ -44,6 +44,11 @@ final class Statements {
     /**
      * 
      */
+    public static final String INSERT_INTO_RIGHT_TUPLES = "INSERT into A_RIGHT_TUPLES "
+            + "(tuple_id, sink_id, object) values (a_right_tuples_seq.NEXTVAL, ?, ?)";
+    /**
+     * 
+     */
     static final String SELECT_ROW = "SELECT * from A_AGENDA_ITEMS where rownum = ?";
     /**
      * 
