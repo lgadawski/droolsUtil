@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import oracle.jdbc.pool.OracleDataSource;
 import oracle.ucp.jdbc.PoolDataSource;
@@ -24,7 +26,7 @@ public class JdbcAgendaItemManagerUtil {
     /**
      * Instance.
      */
-    private static final JdbcAgendaItemManagerUtil INSTANCE = null;
+    private static JdbcAgendaItemManagerUtil INSTANCE = null;
     /**
      * 
      */
@@ -53,6 +55,8 @@ public class JdbcAgendaItemManagerUtil {
             e.printStackTrace();
         }
         truncateAgendaItems();
+        truncateLeftTuples();
+        truncateRightTuples();
     }
 
     /**
@@ -60,7 +64,8 @@ public class JdbcAgendaItemManagerUtil {
      */
     public static synchronized JdbcAgendaItemManagerUtil getInstance() {
         if (INSTANCE == null) {
-            return new JdbcAgendaItemManagerUtil();
+            INSTANCE = new JdbcAgendaItemManagerUtil();
+            return INSTANCE;
         }
         return INSTANCE;
     }
@@ -88,7 +93,7 @@ public class JdbcAgendaItemManagerUtil {
      * @param object
      *            to be saved.
      */
-    public void saveObject(final Object object) {
+    public void saveAgendaItem(final Object object) {
         try {
             final Connection connection = getConnection();
             final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
@@ -113,6 +118,39 @@ public class JdbcAgendaItemManagerUtil {
         } catch (final SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @param sinkId
+     * @param leftTuple
+     */
+    public void saveLeftTuple(final int sinkId, final Object leftTuple) {
+        saveTuple(sinkId, leftTuple);
+
+    }
+
+    /**
+     * @param sinkId
+     * @param rightTuple
+     */
+    public void saveRightTuple(final int sinkId, final Object rightTuple) {
+        saveTuple(sinkId, rightTuple);
+    }
+
+    /**
+     * @param sinkId
+     * @return
+     */
+    public List<Object> getLeftTuples(final int sinkId) {
+        return getTupleList(sinkId, Statements.SELECT_LEFT_TUPLES);
+    }
+
+    /**
+     * @param sinkId
+     * @return
+     */
+    public List<Object> getRightTuples(final int sinkId) {
+        return getTupleList(sinkId, Statements.SELECT_RIGHT_TUPLES);
     }
 
     /**
@@ -162,7 +200,7 @@ public class JdbcAgendaItemManagerUtil {
             while (resultSet.next()) {
                 totalCount = resultSet.getInt(Statements.COUNT_STAR);
             }
-            resultSet.close();
+            // resultSet.close();
             statement.close();
             closeConnection(connection);
         } catch (final SQLException e) {
@@ -176,6 +214,85 @@ public class JdbcAgendaItemManagerUtil {
      */
     public void truncateAgendaItems() {
         executeStatement(Statements.TRUNCATE_TABLE_AGENDA_ITEMS);
+    }
+
+    /**
+     * @param sinkId
+     * @param selectStmt
+     * @return
+     */
+    private List<Object> getTupleList(final int sinkId, final String selectStmt) {
+        final List<Object> restults = new ArrayList<Object>();
+        try {
+            final Connection connection = getConnection();
+            final PreparedStatement statement = connection
+                    .prepareStatement(selectStmt);
+            statement.setInt(1, sinkId);
+            final ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                final ByteArrayInputStream inputStream = new ByteArrayInputStream(
+                        resultSet.getBytes("object"));
+                final ObjectInputStream objectInputStream = new ObjectInputStream(
+                        inputStream);
+                final Object object = objectInputStream.readObject();
+                restults.add(object);
+                objectInputStream.close();
+            }
+            statement.close();
+            closeConnection(connection);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } catch (final ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return restults;
+    }
+
+    /**
+     * @param sinkId
+     * @param tuple
+     */
+    private void saveTuple(final int sinkId, final Object tuple) {
+        try {
+            final Connection connection = getConnection();
+            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+                    byteOutputStream);
+            objectOutputStream.writeObject(tuple);
+            objectOutputStream.flush();
+            objectOutputStream.close();
+
+            final byte[] data = byteOutputStream.toByteArray();
+            final PreparedStatement statement = connection
+                    .prepareStatement(Statements.INSERT_INTO_LEFT_TUPLES);
+            statement.setInt(1, sinkId);
+            statement.setObject(2, data);
+            statement.executeUpdate();
+            statement.close();
+            closeConnection(connection);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        } catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 
+     */
+    private void truncateLeftTuples() {
+        executeStatement(Statements.TRUNCATE_TABLE_LEFT_TUPLES);
+    }
+
+    /**
+     * 
+     */
+    private void truncateRightTuples() {
+        executeStatement(Statements.TRUNCATE_TABLE_RIGHT_TUPLES);
     }
 
     /**
@@ -245,5 +362,4 @@ public class JdbcAgendaItemManagerUtil {
             connection.close();
         }
     }
-
 }
