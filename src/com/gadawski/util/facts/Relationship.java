@@ -28,7 +28,7 @@ import org.hibernate.annotations.Index;
  * 
  */
 @Entity
-@Table(name = "A_RELATIONSHIPS")
+@Table(name = "A_RELS")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @NamedQueries({ @NamedQuery(name = "Relationship.findRelationshipByJoinNodeId", query = "FROM Relationship WHERE joinNode_ID = :nodeId") })
 // @Cacheable(value = true)

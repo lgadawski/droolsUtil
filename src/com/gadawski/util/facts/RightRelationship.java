@@ -12,7 +12,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "A_RIGHT_RELATIONSHIPS")
+@Table(name = "A_RIGHT_RELS")
 @NamedQueries({ @NamedQuery(name = "RightRelationship.findRelationshipByJoinNodeId", query = "FROM RightRelationship WHERE joinNode_ID = :nodeId") })
 public class RightRelationship extends Relationship {
     /**

@@ -6,7 +6,7 @@ package com.gadawski.util.db.jdbc;
  * @author l.gadawski@gmail.com
  * 
  */
-class JdbcConfigProps {
+final class JdbcConfigProps {
     /**
      * 
      */

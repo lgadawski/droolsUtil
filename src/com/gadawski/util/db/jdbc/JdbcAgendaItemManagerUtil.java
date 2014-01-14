@@ -20,11 +20,11 @@ import oracle.ucp.jdbc.PoolDataSourceFactory;
  * @author l.gadawski@gmail.com
  * 
  */
-public class JdbcEntityManagerUtil {
+public class JdbcAgendaItemManagerUtil {
     /**
      * Instance.
      */
-    private static final JdbcEntityManagerUtil INSTANCE = null;
+    private static final JdbcAgendaItemManagerUtil INSTANCE = null;
     /**
      * 
      */
@@ -45,7 +45,7 @@ public class JdbcEntityManagerUtil {
     /**
      * Private constructor to block creating objects.
      */
-    private JdbcEntityManagerUtil() {
+    private JdbcAgendaItemManagerUtil() {
         m_poolDataSource = PoolDataSourceFactory.getPoolDataSource();
         try {
             setConnectionProps();
@@ -56,11 +56,11 @@ public class JdbcEntityManagerUtil {
     }
 
     /**
-     * @return instance of {@link JdbcEntityManagerUtil} class.
+     * @return instance of {@link JdbcAgendaItemManagerUtil} class.
      */
-    public static synchronized JdbcEntityManagerUtil getInstance() {
+    public static synchronized JdbcAgendaItemManagerUtil getInstance() {
         if (INSTANCE == null) {
-            return new JdbcEntityManagerUtil();
+            return new JdbcAgendaItemManagerUtil();
         }
         return INSTANCE;
     }
@@ -76,6 +76,7 @@ public class JdbcEntityManagerUtil {
 
     /**
      * Removes AgendaItem from top.
+     * 
      * @param item
      */
     public void removeNextAgendaItem() {
