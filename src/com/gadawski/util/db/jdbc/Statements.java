@@ -6,7 +6,7 @@ package com.gadawski.util.db.jdbc;
  * @author l.gadawski@gmail.com
  * 
  */
-final class Statements {
+public final class Statements {
     /**
      * 
      */
@@ -35,7 +35,7 @@ final class Statements {
      * 
      */
     static final String INSERT_INTO_A_I_STATEMENT = "INSERT into A_AGENDA_ITEMS "
-            + "(agenda_item_id, agenda_object) values (a_agenda_items_seq.NEXTVAL, ?)";
+            + "(agenda_item_id, object) values (a_agenda_items_seq.NEXTVAL,?)";
     /**
      * 
      */
@@ -53,11 +53,11 @@ final class Statements {
     /**
      * 
      */
-    static final String SELECT_LEFT_TUPLES = "SELECT * FROM A_LEFT_TUPLES WHERE sink_id = ?";
+    public static final String SELECT_LEFT_TUPLES = "SELECT * FROM A_LEFT_TUPLES WHERE sink_id = ?";
     /**
      * 
      */
-    static final String SELECT_RIGHT_TUPLES = "SELECT * FROM A_RIGHT_TUPLES WHERE sink_id = ?";
+    public static final String SELECT_RIGHT_TUPLES = "SELECT * FROM A_RIGHT_TUPLES WHERE sink_id = ?";
 
     /**
      * 
