@@ -6,7 +6,7 @@ package com.gadawski.util.db.jdbc;
  * @author l.gadawski@gmail.com
  * 
  */
-final class JdbcConfigProps {
+final class JdbcOracleConfig {
     /**
      * 
      */
@@ -27,7 +27,7 @@ final class JdbcConfigProps {
     /**
      * 
      */
-    private JdbcConfigProps() {
+    private JdbcOracleConfig() {
 
     }
 }

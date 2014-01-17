@@ -18,5 +18,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="ucp.jar"/>
 	<classpathentry kind="lib" path="ucpdemos.jar"/>
+	<classpathentry kind="lib" path="D:/_development/workspace/example/util/postgresql-9.2-1002.jdbc4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
