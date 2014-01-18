@@ -7,13 +7,18 @@ package com.gadawski.util.facts;
  * 
  */
 public class CarProposal {
+    
+    
+	public Car car;
+    public Customer customer;
 
-	/**
+    /**
 	 * @param customer
 	 * @param car
 	 */
 	public CarProposal(Customer customer, Car car) {
-
+	    this.customer  =customer;
+	    this.car = car;
 	}
 
 	/**

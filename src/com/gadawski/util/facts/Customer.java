@@ -82,7 +82,7 @@ public class Customer implements Serializable {
     /**
      * For persistence.
      */
-    Customer() {
+    public Customer() {
     }
 
     /**
