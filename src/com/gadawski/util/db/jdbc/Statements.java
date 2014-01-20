@@ -34,6 +34,18 @@ public final class Statements {
     /**
      * 
      */
+    static final String SELECT_FIRST_ROW = "SELECT * from AGENDA_ITEMS where rownum = ?";
+    /**
+     * 
+     */
+    public static final String SELECT_FIRST_ROW_P = "SELECT * from AGENDA_ITEMS limit ?";
+    /**
+     * 
+     */
+    public static final String SELECT_FACT_HANDLE_BY_ID = "SELECT * FROM FACT_HANDLES where fact_handle_id = ?";
+    /**
+     * 
+     */
     static final String TRUNCATE_TABLE_AGENDA_ITEMS = "truncate table agenda_items cascade";
     /**
      * 
@@ -112,18 +124,15 @@ public final class Statements {
             + "(right_tuple_id, fact_handle_id, sink_id, object) values "
             + "(nextval('right_tuple_id_seq'), ?, ?, ?)";
     /**
-     * 
+     * Special insert statement combined with update. If row doesn't exists in
+     * table insert is performed, otherwise nothing happens. params: _
+     * ?(object), ?(fact_handle_id), ?(fact_handle_id), ?(object), ?(fact_handle_id).
+     * TODO to be correcte!
      */
-    static final String INSERT_INTO_FACT_HANDLES_P = "INSERT into FACT_HANDLES "
-            + "(fact_handle_id, object) values (?, ?)";
-    /**
-     * 
-     */
-    static final String SELECT_FIRST_ROW = "SELECT * from AGENDA_ITEMS where rownum = ?";
-    /**
-     * 
-     */
-    static final String SELECT_FIRST_ROW_P = "SELECT * from AGENDA_ITEMS limit ?";
+    static final String INSERT_INTO_FACT_HANDLES_P = 
+            "UPDATE fact_handles SET object = ? WHERE fact_handle_id = ?;"
+            + "INSERT into fact_handles (fact_handle_id, object)  SELECT ?, ?"
+            + "WHERE NOT EXISTS (SELECT 1 FROM fact_handles WHERE fact_handle_id = ?);";
 
     /**
      * 

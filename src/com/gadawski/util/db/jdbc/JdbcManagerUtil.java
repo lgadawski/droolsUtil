@@ -81,7 +81,7 @@ public class JdbcManagerUtil {
      * @return
      */
     public Object getNextAgendaItemObject() {
-        return getObject(1);
+        return getObjectByParamaterId(1, Statements.SELECT_FIRST_ROW_P);
     }
 
     /**
@@ -158,10 +158,19 @@ public class JdbcManagerUtil {
     }
 
     /**
+     * @param handleId
+     * @return
+     */
+    public Object getFactHandle(Integer handleId) {
+        return getObjectByParamaterId(handleId,
+                Statements.SELECT_FACT_HANDLE_BY_ID);
+    }
+
+    /**
      * Saves fact handle.
      */
     public void saveFactHandle(int handleId, Object handle) {
-        saveObjectWithId(handleId, handle,
+        saveOrUpdateFactHandle(handleId, handle,
                 Statements.INSERT_INTO_FACT_HANDLES_P);
     }
 
@@ -174,18 +183,17 @@ public class JdbcManagerUtil {
     }
 
     /**
-     * @param rowNum
+     * @param id
      * @return
      */
-    public Object getObject(final int rowNum) {
+    public Object getObjectByParamaterId(final int id, String sqlStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
             connection = getConnection();
-            statement = connection
-                    .prepareStatement(Statements.SELECT_FIRST_ROW_P);
-            statement.setInt(1, rowNum);
+            statement = connection.prepareStatement(sqlStmt);
+            statement.setInt(1, id);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 final Object object = readObject(resultSet);
@@ -524,6 +532,44 @@ public class JdbcManagerUtil {
     }
 
     /**
+     * Perform 'upsert'.
+     * 
+     * @param handleId
+     * @param object
+     * @param sqlStmt
+     */
+    private void saveOrUpdateFactHandle(int handleId, Object object,
+            String sqlStmt) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sqlStmt);
+            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+            final ObjectOutputStream objOutputStream = new ObjectOutputStream(
+                    byteOutputStream);
+            objOutputStream.writeObject(object);
+            objOutputStream.flush();
+            objOutputStream.close();
+
+            final byte[] data = byteOutputStream.toByteArray();
+
+            statement.setObject(1, data);
+            statement.setObject(2, handleId);
+            statement.setObject(3, handleId);
+            statement.setObject(4, data);
+            statement.setObject(5, handleId);
+            statement.executeUpdate();
+            closeEverything(connection, statement, null);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * @param tupleId
      * @param sinkId
      * @param stmt
@@ -563,5 +609,4 @@ public class JdbcManagerUtil {
             e.printStackTrace();
         }
     }
-
 }
