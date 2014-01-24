@@ -85,6 +85,10 @@ public final class Statements {
     /**
      * 
      */
+    public static final String DELETE_CHILD_LEFT_TUPLES = "delete from left_tuples where parent_right_tuple_id = ?";
+    /**
+     * 
+     */
     public static final String DELETE_LEFT_TUPLE = "delete from left_tuples "
             + "where left_tuple_id = ? AND sink_id = ?";
     /**
@@ -123,26 +127,29 @@ public final class Statements {
      */
     public static final String INSERT_INTO_A_I_STATEMENT_P = "INSERT into AGENDA_ITEMS "
             + "(agenda_item_id, left_tuple_id, object) values (nextval('agenda_item_id_seq'), ?, ?)";
-//    /**
-//     * 
-//     */
-//    static final String INSERT_INTO_LEFT_TUPLES_P = "INSERT into LEFT_TUPLES "
-//            + "(left_tuple_id, parent_tuple_id, fact_handle_id, sink_id, object) values "
-//            + "(nextval('left_tuple_id_seq'), ?, ?, ?, ?)";
+    // /**
+    // *
+    // */
+    // static final String INSERT_INTO_LEFT_TUPLES_P =
+    // "INSERT into LEFT_TUPLES "
+    // +
+    // "(left_tuple_id, parent_tuple_id, fact_handle_id, sink_id, object) values "
+    // + "(nextval('left_tuple_id_seq'), ?, ?, ?, ?)";
     /**
      * object, fact_handle_id, sink_id
      */
     static final String UPDATE_LEFT_TUPLE_P = "UPDATE left_tuples SET object = ? "
             + " WHERE fact_handle_id = ? AND sink_id = ?;";
     /**
-     * This statement has to be combined with INSERT_INTO_LEFT_TUPLES_P statement.
-     * parent_tuple_id, fact_handle_id, sink_id, object, fact_handle_id, sink_id
+     * This statement has to be combined with INSERT_INTO_LEFT_TUPLES_P
+     * statement. parent_tuple_id, fact_handle_id, sink_id, object,
+     * fact_handle_id, sink_id
      */
     static final String INSERT_INTO_LEFT_TUPLES_P = " INSERT into LEFT_TUPLES "
-            + "(left_tuple_id, parent_tuple_id, fact_handle_id, sink_id, object) "
-            + " (SELECT nextval('left_tuple_id_seq'), ?, ?, ?, ? WHERE NOT EXISTS " 
+            + "(left_tuple_id, parent_tuple_id, fact_handle_id, parent_right_tuple_id, sink_id, object) "
+            + " (SELECT nextval('left_tuple_id_seq'), ?, ?, ?, ?, ? WHERE NOT EXISTS "
             + " (SELECT 1 FROM left_tuples WHERE fact_handle_id = ? AND sink_id = ?));";
-    
+
     /**
      * 
      */
@@ -158,7 +165,7 @@ public final class Statements {
     static final String INSERT_INTO_FACT_HANDLES_P = "UPDATE fact_handles SET object = ? WHERE fact_handle_id = ?;"
             + "INSERT into fact_handles (fact_handle_id, object)  "
             + "SELECT ?, ? WHERE NOT EXISTS "
-                    + "(SELECT 1 FROM fact_handles WHERE fact_handle_id = ?);";
+            + "(SELECT 1 FROM fact_handles WHERE fact_handle_id = ?);";
     /**
      * 
      */

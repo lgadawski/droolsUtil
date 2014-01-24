@@ -96,8 +96,10 @@ public class JdbcManagerUtil {
      * @return
      */
     public int saveLeftTuple(final Integer parentId, final Integer handleId,
-            final int sinkId, final Object leftTuple) {
-        return saveLeftTupleParam(parentId, handleId, sinkId, leftTuple, Statements.UPDATE_LEFT_TUPLE_P,
+            final Integer parentRightTupleId, final int sinkId,
+            final Object leftTuple) {
+        return saveLeftTupleParam(parentId, handleId, parentRightTupleId,
+                sinkId, leftTuple, Statements.UPDATE_LEFT_TUPLE_P,
                 Statements.INSERT_INTO_LEFT_TUPLES_P);
     }
 
@@ -136,6 +138,16 @@ public class JdbcManagerUtil {
      */
     public void removeRightTuple(final long tupleId, final int sinkId) {
         removeTuple(tupleId, sinkId, Statements.DELETE_RIGHT_TUPLE);
+    }
+
+    /**
+     * Removes all left tuples where child_righ_tuple_id == chilldRightTupleId.
+     * 
+     * @param childRightTupleId
+     *            - fk in leftTuples table.
+     */
+    public void removeRightTupleChilds(Integer childRightTupleId) {
+        removeObjectById(childRightTupleId, Statements.DELETE_CHILD_LEFT_TUPLES);
     }
 
     /**
@@ -506,7 +518,8 @@ public class JdbcManagerUtil {
      * @return
      */
     private int saveLeftTupleParam(final Integer parentId,
-            final Integer handleId, final int sinkId, final Object tuple, final String updateStmt,
+            final Integer handleId, final Integer parentRightTupleId,
+            final int sinkId, final Object tuple, final String updateStmt,
             final String insertStmt) {
         Connection connection = null;
         PreparedStatement insert = null, update = null;
@@ -521,23 +534,24 @@ public class JdbcManagerUtil {
             objectOutputStream.close();
 
             final byte[] data = byteOutputStream.toByteArray();
-//            object, fact_handle_id, sink_id,
+            // object, fact_handle_id, sink_id,
             update = connection.prepareStatement(updateStmt);
             update.setObject(1, data);
             update.setObject(2, handleId);
             update.setObject(3, sinkId);
             update.executeUpdate();
-            
+
             insert = connection.prepareStatement(insertStmt,
                     Statement.RETURN_GENERATED_KEYS);
             // parent_tuple_id, fact_handle_id,
             // sink_id, object, fact_handle_id, sink_id
             insert.setObject(1, parentId);
             insert.setObject(2, handleId);
-            insert.setObject(3, sinkId);
-            insert.setObject(4, data);
-            insert.setObject(5, handleId);
-            insert.setObject(6, sinkId);
+            insert.setObject(3, parentRightTupleId);
+            insert.setObject(4, sinkId);
+            insert.setObject(5, data);
+            insert.setObject(6, handleId);
+            insert.setObject(7, sinkId);
             insert.executeUpdate();
 
             final ResultSet keys = insert.getGeneratedKeys();
@@ -691,16 +705,16 @@ public class JdbcManagerUtil {
     /**
      * Performs delete operation by given query.
      * 
-     * @param handleId
+     * @param id
      * @param sqlStmt
      */
-    private void removeObjectById(int handleId, String sqlStmt) {
+    private void removeObjectById(int id, String sqlStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sqlStmt);
-            statement.setLong(1, handleId);
+            statement.setLong(1, id);
             statement.execute();
             closeEverything(connection, statement, null);
         } catch (final SQLException e) {
