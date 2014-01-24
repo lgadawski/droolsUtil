@@ -1,3 +1,4 @@
-(customer (name 0) (age 82) (income 2065.05) (cash 287151.88) (married true) )
-(car (name 0) (price 60564.45) )
-(house (name 0) (price 93613.77) (area 41880.46) )
+(customer (name 0) (age 53) (income 11998.81) (cash 340108.28) (married false) )
+(car (name 0) (price 69592.65) )
+(house (name 0) (price 255011.75) (area 60125.13) )
+(house (name 1) (price 582320.88) (area 13553.28) )
