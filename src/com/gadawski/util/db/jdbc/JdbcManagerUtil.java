@@ -13,7 +13,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.postgresql.core.VisibleBufferedInputStream;
 import org.postgresql.ds.PGPoolingDataSource;
 
 /**
@@ -81,7 +80,7 @@ public class JdbcManagerUtil {
      * @return
      */
     public Object getNextAgendaItemObject() {
-        return getObjectByStatement(Statements.SELECT_LAST_ROW_AGENDA_ITEM);
+        return getObjectByParamaterId(1, Statements.SELECT_LAST_ROW_AGENDA_ITEM);
     }
 
     /**
@@ -95,8 +94,8 @@ public class JdbcManagerUtil {
             final Integer parentRightTupleId, final int sinkId,
             final Object leftTuple) {
         return saveLeftTupleParam(parentId, handleId, parentRightTupleId,
-                sinkId, leftTuple, Statements.UPDATE_LEFT_TUPLE_P,
-                Statements.INSERT_INTO_LEFT_TUPLES_P);
+                sinkId, leftTuple, Statements.UPDATE_LEFT_TUPLE,
+                Statements.INSERT_INTO_LEFT_TUPLES);
     }
 
     /**
@@ -108,15 +107,7 @@ public class JdbcManagerUtil {
     public int saveRightTuple(final Integer handleId, final int sinkId,
             final Object rightTuple) {
         return saveTuple(handleId, sinkId, rightTuple,
-                Statements.INSERT_INTO_RIGHT_TUPLES_P);
-    }
-
-    /**
-     * @param tupleId
-     * @param rightTuple
-     */
-    public void updateRightTuple(Integer tupleId, Object rightTuple) {
-        updateObjectById(tupleId, rightTuple, Statements.UPDATE_RIGHT_TUPLE);
+                Statements.INSERT_INTO_RIGHT_TUPLES);
     }
 
     /**
@@ -132,8 +123,8 @@ public class JdbcManagerUtil {
      * @param tupleId
      * @param sinkId
      */
-    public void removeRightTuple(final long tupleId, final int sinkId) {
-        removeTuple(tupleId, sinkId, Statements.DELETE_RIGHT_TUPLE);
+    public void removeRightTuple(final long tupleId) {
+        removeObjectById((int) tupleId, Statements.DELETE_RIGHT_TUPLE);
     }
 
     /**
@@ -142,30 +133,30 @@ public class JdbcManagerUtil {
      * @param childRightTupleId
      *            - fk in leftTuples table.
      */
-    public void removeRightTupleChilds(Integer childRightTupleId) {
+    public void removeRightTupleChilds(final Integer childRightTupleId) {
         removeObjectById(childRightTupleId, Statements.DELETE_CHILD_LEFT_TUPLES);
     }
 
     /**
      * @param handleId
      */
-    public void removeFactHandle(int handleId) {
+    public void removeFactHandle(final int handleId) {
         removeObjectById(handleId, Statements.DELETE_FACT_HANDLE);
     }
 
     /**
      * @param tupleId
      */
-    public void removeAgendaItemByLeftTupleId(Integer tupleId) {
-        removeObjectById(tupleId, Statements.DELETE_AGENDA_ITEM_BY_LT_ID);
+    public void removeAgendaItemByLeftTupleId(final long tupleId) {
+        removeObjectById((int) tupleId, Statements.DELETE_AGENDA_ITEM_BY_LT_ID);
     }
 
     /**
      * @param tupleId
      * @param sinkId
      */
-    public void removeLeftTuple(final long tupleId, final int sinkId) {
-        removeTuple(tupleId, sinkId, Statements.DELETE_LEFT_TUPLE);
+    public void removeLeftTuple(final long tupleId) {
+        removeObjectById((int) tupleId, Statements.DELETE_LEFT_TUPLE);
     }
 
     /**
@@ -188,7 +179,7 @@ public class JdbcManagerUtil {
      * @param handleId
      * @return
      */
-    public Object getFactHandle(Integer handleId) {
+    public Object getFactHandle(final Integer handleId) {
         return getObjectByParamaterId(handleId,
                 Statements.SELECT_FACT_HANDLE_BY_ID);
     }
@@ -197,82 +188,23 @@ public class JdbcManagerUtil {
      * @param tupleId
      * @return
      */
-    public Object getRightTuple(Integer tupleId) {
+    public Object getRightTuple(final Integer tupleId) {
         return getObjectByParamaterId(tupleId, Statements.SELECT_RIGHT_TUPLE_ID);
     }
 
     /**
      * Saves fact handle.
      */
-    public void saveFactHandle(int handleId, Object handle) {
+    public void saveFactHandle(final int handleId, final Object handle) {
         saveOrUpdateFactHandle(handleId, handle,
-                Statements.INSERT_INTO_FACT_HANDLES_P);
+                Statements.INSERT_INTO_FACT_HANDLES);
     }
 
     /**
      * Saves agenda item.
      */
     public void saveAgendaItem(final Integer tupleId, final Object object) {
-        saveObjectWithId(tupleId, object,
-                Statements.INSERT_INTO_A_I_STATEMENT_P);
-    }
-
-    /**
-     * @param id
-     * @return
-     */
-    public Object getObjectByParamaterId(final int id, String sqlStmt) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sqlStmt);
-            statement.setInt(1, id);
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                final Object object = readObject(resultSet);
-                closeEverything(connection, statement, resultSet);
-                return object;
-            }
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        closeEverything(connection, statement, resultSet);
-        return null;
-    }
-
-    /**
-     * @param object
-     * @param selectLastRowAgendaItem
-     * @return
-     */
-    private Object getObjectByStatement(String sqlStmt) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sqlStmt);
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                final Object object = readObject(resultSet);
-                closeEverything(connection, statement, resultSet);
-                return object;
-            }
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        closeEverything(connection, statement, resultSet);
-        return null;
+        saveObjectWithId(tupleId, object, Statements.INSERT_INTO_A_I_STATEMENT);
     }
 
     /**
@@ -284,7 +216,7 @@ public class JdbcManagerUtil {
     public Object readObject(final ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException {
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(
-                resultSet.getBytes("object"));
+                resultSet.getBytes(Statements.OBJECT));
         final ObjectInputStream objectInputStream = new ObjectInputStream(
                 inputStream);
         final Object object = objectInputStream.readObject();
@@ -307,7 +239,8 @@ public class JdbcManagerUtil {
      * @return
      * @throws SQLException
      */
-    public Integer readRightTupleId(ResultSet resultSet) throws SQLException {
+    public Integer readRightTupleId(final ResultSet resultSet)
+            throws SQLException {
         return resultSet.getInt(Statements.RIGHT_TUPLE_ID);
     }
 
@@ -325,7 +258,6 @@ public class JdbcManagerUtil {
                     .prepareStatement(Statements.COUNT_TOTAL_NUMBER_OF_AGENDA_ITEMS);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                // totalCount = resultSet.getInt(Statements.COUNT_STAR);
                 totalCount = resultSet.getInt(Statements.COUNT);
             }
             closeEverything(connection, statement, resultSet);
@@ -372,6 +304,16 @@ public class JdbcManagerUtil {
     }
 
     /**
+     * Truncate LEFT_TUPLES, RIGHT_TUPLES, FACT_HANDLES, AGENDA_ITEM tables.
+     */
+    private void truncateTables() {
+        truncateLeftTuples();
+        truncateRightTuples();
+        truncateFactHandles();
+        truncateAgendaItems();
+    }
+
+    /**
      * 
      */
     public void truncateAgendaItems() {
@@ -400,20 +342,10 @@ public class JdbcManagerUtil {
     }
 
     /**
-     * Truncate LEFT_TUPLES, RIGHT_TUPLES, FACT_HANDLES, AGENDA_ITEM tables.
-     */
-    private void truncateTables() {
-        truncateLeftTuples();
-        truncateRightTuples();
-        truncateFactHandles();
-        truncateAgendaItems();
-    }
-
-    /**
      * 
      */
     private void deleteFirstAgendaItem() {
-        executeStatement(Statements.DELETE_FIRST_ROW_P);
+        executeStatement(Statements.DELETE_FIRST_AGENDA_ITEM);
     }
 
     /**
@@ -436,11 +368,11 @@ public class JdbcManagerUtil {
     private List<Object> getTupleList(final int sinkId, final String selectStmt) {
         final List<Object> restults = new ArrayList<Object>();
         try {
-            Connection connection = getConnection();
-            PreparedStatement statement = connection
+            final Connection connection = getConnection();
+            final PreparedStatement statement = connection
                     .prepareStatement(selectStmt);
             statement.setInt(1, sinkId);
-            ResultSet resultSet = statement.executeQuery();
+            final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 restults.add(readObject(resultSet));
             }
@@ -456,7 +388,7 @@ public class JdbcManagerUtil {
     }
 
     /**
-     * Initilizes connection to db and executes statement.
+     * Initializes connection to db and executes statement.
      * 
      * @param stmt
      *            statement to be execute.
@@ -475,34 +407,52 @@ public class JdbcManagerUtil {
     }
 
     /**
-     * @param tupleId
-     * @param rightTuple
-     * @param updateRightTuple
+     * Performs delete operation by given query.
+     * 
+     * @param id
+     * @param sqlStmt
      */
-    private void updateObjectById(Integer tupleId, Object object, String sqlStmt) {
+    private void removeObjectById(final int id, final String sqlStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
             connection = getConnection();
-            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-                    byteOutputStream);
-            objectOutputStream.writeObject(object);
-            objectOutputStream.flush();
-            objectOutputStream.close();
-
-            final byte[] data = byteOutputStream.toByteArray();
-
             statement = connection.prepareStatement(sqlStmt);
-            statement.setObject(1, data);
-            statement.setObject(2, tupleId);
-            statement.executeUpdate();
+            statement.setLong(1, id);
+            statement.execute();
             closeEverything(connection, statement, null);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    private Object getObjectByParamaterId(final int id, final String sqlStmt) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = getConnection();
+            statement = connection.prepareStatement(sqlStmt);
+            statement.setInt(1, id);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                final Object object = readObject(resultSet);
+                closeEverything(connection, statement, resultSet);
+                return object;
+            }
         } catch (final SQLException e) {
             e.printStackTrace();
         } catch (final IOException e) {
             e.printStackTrace();
+        } catch (final ClassNotFoundException e) {
+            e.printStackTrace();
         }
+        closeEverything(connection, statement, resultSet);
+        return null;
     }
 
     /**
@@ -575,7 +525,7 @@ public class JdbcManagerUtil {
      * @param insertStmt
      * @return
      */
-    private int saveTuple(Integer handleId, final int sinkId,
+    private int saveTuple(final Integer handleId, final int sinkId,
             final Object tuple, final String insertStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -619,7 +569,7 @@ public class JdbcManagerUtil {
      * @param sqlStmt
      */
     private void saveObjectWithId(final Integer id, final Object object,
-            String sqlStmt) {
+            final String sqlStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -651,8 +601,8 @@ public class JdbcManagerUtil {
      * @param object
      * @param sqlStmt
      */
-    private void saveOrUpdateFactHandle(int handleId, Object object,
-            String sqlStmt) {
+    private void saveOrUpdateFactHandle(final int handleId,
+            final Object object, final String sqlStmt) {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
@@ -682,44 +632,4 @@ public class JdbcManagerUtil {
 
     }
 
-    /**
-     * @param tupleId
-     * @param sinkId
-     * @param stmt
-     */
-    private void removeTuple(final long tupleId, final int sinkId,
-            final String stmt) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(stmt);
-            statement.setLong(1, tupleId);
-            statement.setInt(2, sinkId);
-            statement.execute();
-            closeEverything(connection, statement, null);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Performs delete operation by given query.
-     * 
-     * @param id
-     * @param sqlStmt
-     */
-    private void removeObjectById(int id, String sqlStmt) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        try {
-            connection = getConnection();
-            statement = connection.prepareStatement(sqlStmt);
-            statement.setLong(1, id);
-            statement.execute();
-            closeEverything(connection, statement, null);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
