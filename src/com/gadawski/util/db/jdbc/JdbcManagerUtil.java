@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.postgresql.core.VisibleBufferedInputStream;
 import org.postgresql.ds.PGPoolingDataSource;
 
 /**
