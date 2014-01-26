@@ -29,20 +29,15 @@ public class JdbcManagerUtil {
     /**
      * Initial pool size
      */
-    private static final int POOL_SIZE = 100;
+    private static final int POOL_SIZE = 10000;
     /**
      * Fetch size for query.
      */
-    public static final int FETCH_SIZE = 100;
+    public static final int FETCH_SIZE = 10000;
     /**
      * 
      */
     private final PGPoolingDataSource m_poolDataSource;
-
-    // /**
-    // *
-    // */
-    // private List<Object> m_agendaItems = new ArrayList<Object>();
 
     /**
      * Private constructor to block creating objects.
@@ -534,11 +529,14 @@ public class JdbcManagerUtil {
             objectOutputStream.close();
 
             final byte[] data = byteOutputStream.toByteArray();
-            // object, fact_handle_id, sink_id,
+            // object, parent_tuple_id, parent_right_tuple_id,
+            // sink_id,
             update = connection.prepareStatement(updateStmt);
             update.setObject(1, data);
-            update.setObject(2, handleId);
-            update.setObject(3, sinkId);
+            update.setObject(2, parentId);
+            update.setObject(3, parentRightTupleId);
+            update.setObject(4, handleId);
+            update.setObject(5, sinkId);
             update.executeUpdate();
 
             insert = connection.prepareStatement(insertStmt,
@@ -550,8 +548,10 @@ public class JdbcManagerUtil {
             insert.setObject(3, parentRightTupleId);
             insert.setObject(4, sinkId);
             insert.setObject(5, data);
-            insert.setObject(6, handleId);
-            insert.setObject(7, sinkId);
+            insert.setObject(6, parentId);
+            insert.setObject(7, parentRightTupleId);
+            insert.setObject(8, handleId);
+            insert.setObject(9, sinkId);
             insert.executeUpdate();
 
             final ResultSet keys = insert.getGeneratedKeys();
