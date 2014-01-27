@@ -106,8 +106,24 @@ public class JdbcManagerUtil {
      */
     public int saveRightTuple(final Integer handleId, final int sinkId,
             final Object rightTuple) {
-        return saveTuple(handleId, sinkId, rightTuple,
-                Statements.INSERT_INTO_RIGHT_TUPLES);
+        return saveOrUpdateRightTuple(handleId, sinkId, rightTuple,
+                Statements.UPDATE_RIGHT_TUPLE,
+                Statements.INSERT_INTO_RIGHT_TUPLES, Statements.RIGHT_TUPLE_ID);
+    }
+
+    /**
+     * Saves fact handle.
+     */
+    public void saveFactHandle(final int handleId, final Object handle) {
+        saveOrUpdateFactHandle(handleId, handle, Statements.UPDATE_FACT_HANDLE,
+                Statements.INSERT_INTO_FACT_HANDLES);
+    }
+
+    /**
+     * Saves agenda item.
+     */
+    public void saveAgendaItem(final Integer tupleId, final Object object) {
+        saveObjectWithId(tupleId, object, Statements.INSERT_INTO_A_I_STATEMENT);
     }
 
     /**
@@ -190,21 +206,6 @@ public class JdbcManagerUtil {
      */
     public Object getRightTuple(final Integer tupleId) {
         return getObjectByParamaterId(tupleId, Statements.SELECT_RIGHT_TUPLE_ID);
-    }
-
-    /**
-     * Saves fact handle.
-     */
-    public void saveFactHandle(final int handleId, final Object handle) {
-        saveOrUpdateFactHandle(handleId, handle,
-                Statements.INSERT_INTO_FACT_HANDLES);
-    }
-
-    /**
-     * Saves agenda item.
-     */
-    public void saveAgendaItem(final Integer tupleId, final Object object) {
-        saveObjectWithId(tupleId, object, Statements.INSERT_INTO_A_I_STATEMENT);
     }
 
     /**
@@ -456,6 +457,8 @@ public class JdbcManagerUtil {
     }
 
     /**
+     * Done in one transaction.
+     * 
      * @param parentId
      * @param sinkId
      * @param tuple
@@ -472,14 +475,9 @@ public class JdbcManagerUtil {
         int generatedKey = -1;
         try {
             connection = getConnection();
-            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-                    byteOutputStream);
-            objectOutputStream.writeObject(tuple);
-            objectOutputStream.flush();
-            objectOutputStream.close();
+            connection.setAutoCommit(false);
 
-            final byte[] data = byteOutputStream.toByteArray();
+            final byte[] data = getData(tuple);
             // object, parent_tuple_id, parent_right_tuple_id,
             // sink_id,
             update = connection.prepareStatement(updateStmt);
@@ -505,6 +503,9 @@ public class JdbcManagerUtil {
             insert.setObject(9, sinkId);
             insert.executeUpdate();
 
+            connection.commit();
+            connection.setAutoCommit(true);
+
             final ResultSet keys = insert.getGeneratedKeys();
             if (keys.next()) {
                 generatedKey = (int) keys.getLong(Statements.LEFT_TUPLE_ID);
@@ -525,34 +526,41 @@ public class JdbcManagerUtil {
      * @param insertStmt
      * @return
      */
-    private int saveTuple(final Integer handleId, final int sinkId,
-            final Object tuple, final String insertStmt) {
+    private int saveOrUpdateRightTuple(final Integer handleId,
+            final int sinkId, final Object tuple, final String updateStmt,
+            final String insertStmt, final String idColumnName) {
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement update = null, insert = null;
         int generatedKey = -1;
         try {
             connection = getConnection();
-            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-                    byteOutputStream);
-            objectOutputStream.writeObject(tuple);
-            objectOutputStream.flush();
-            objectOutputStream.close();
+            connection.setAutoCommit(false);
 
-            final byte[] data = byteOutputStream.toByteArray();
+            final byte[] data = getData(tuple);
 
-            statement = connection.prepareStatement(insertStmt,
+            update = connection.prepareStatement(updateStmt);
+            update.setObject(1, data);
+            update.setObject(2, handleId);
+            update.setInt(3, sinkId);
+            update.executeUpdate();
+
+            insert = connection.prepareStatement(insertStmt,
                     Statement.RETURN_GENERATED_KEYS);
-            statement.setObject(1, handleId);
-            statement.setInt(2, sinkId);
-            statement.setObject(3, data);
-            statement.executeUpdate();
+            insert.setObject(1, handleId);
+            insert.setInt(2, sinkId);
+            insert.setObject(3, data);
+            insert.setObject(4, handleId);
+            insert.setInt(5, sinkId);
+            insert.executeUpdate();
 
-            final ResultSet keys = statement.getGeneratedKeys();
+            final ResultSet keys = insert.getGeneratedKeys();
             if (keys.next()) {
-                generatedKey = (int) keys.getLong(Statements.RIGHT_TUPLE_ID);
+                generatedKey = (int) keys.getLong(idColumnName);
             }
-            closeEverything(connection, statement, null);
+            connection.commit();
+            connection.setAutoCommit(true);
+
+            closeEverything(connection, insert, null);
         } catch (final SQLException e) {
             e.printStackTrace();
         } catch (final IOException e) {
@@ -575,14 +583,9 @@ public class JdbcManagerUtil {
         try {
             connection = getConnection();
             statement = connection.prepareStatement(sqlStmt);
-            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objOutputStream = new ObjectOutputStream(
-                    byteOutputStream);
-            objOutputStream.writeObject(object);
-            objOutputStream.flush();
-            objOutputStream.close();
 
-            final byte[] data = byteOutputStream.toByteArray();
+            final byte[] data = getData(object);
+
             statement.setObject(1, id);
             statement.setObject(2, data);
             statement.executeUpdate();
@@ -599,31 +602,33 @@ public class JdbcManagerUtil {
      * 
      * @param handleId
      * @param object
-     * @param sqlStmt
+     * @param updateStmt
+     * @param insertStmt
      */
     private void saveOrUpdateFactHandle(final int handleId,
-            final Object object, final String sqlStmt) {
+            final Object object, final String updateStmt, String insertStmt) {
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement update = null, insert = null;
         try {
             connection = getConnection();
-            statement = connection.prepareStatement(sqlStmt);
-            final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-            final ObjectOutputStream objOutputStream = new ObjectOutputStream(
-                    byteOutputStream);
-            objOutputStream.writeObject(object);
-            objOutputStream.flush();
-            objOutputStream.close();
+            connection.setAutoCommit(false);
+            update = connection.prepareStatement(updateStmt);
+            insert = connection.prepareStatement(insertStmt);
 
-            final byte[] data = byteOutputStream.toByteArray();
+            final byte[] data = getData(object);
 
-            statement.setObject(1, data);
-            statement.setObject(2, handleId);
-            statement.setObject(3, handleId);
-            statement.setObject(4, data);
-            statement.setObject(5, handleId);
-            statement.executeUpdate();
-            closeEverything(connection, statement, null);
+            update.setObject(1, data);
+            update.setObject(2, handleId);
+            update.executeUpdate();
+
+            insert.setObject(1, handleId);
+            insert.setObject(2, data);
+            insert.setObject(3, handleId);
+            insert.executeUpdate();
+
+            connection.commit();
+            connection.setAutoCommit(true);
+            closeEverything(connection, insert, null);
         } catch (final IOException e) {
             e.printStackTrace();
         } catch (final SQLException e) {
@@ -632,4 +637,21 @@ public class JdbcManagerUtil {
 
     }
 
+    /**
+     * Gets byte array from object.
+     * 
+     * @param object
+     * @return
+     * @throws IOException
+     */
+    private byte[] getData(final Object object) throws IOException {
+        final ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+                byteOutputStream);
+        objectOutputStream.writeObject(object);
+        objectOutputStream.flush();
+        objectOutputStream.close();
+
+        return byteOutputStream.toByteArray();
+    }
 }
