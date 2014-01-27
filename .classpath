@@ -19,5 +19,14 @@
 	<classpathentry kind="lib" path="ucp.jar"/>
 	<classpathentry kind="lib" path="ucpdemos.jar"/>
 	<classpathentry kind="lib" path="D:/_development/workspace/example/util/postgresql-9.2-1002.jdbc4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Lukasz/.m2/repository/junit/junit/4.10/junit-4.10.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="junit"/>
+			<attribute name="maven.artifactId" value="junit"/>
+			<attribute name="maven.version" value="4.10"/>
+			<attribute name="maven.scope" value="test"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

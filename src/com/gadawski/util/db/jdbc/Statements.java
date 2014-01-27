@@ -124,6 +124,17 @@ public final class Statements {
     /**
      * 
      */
+    static final String UPSERT_INTO_LEFT_TUPLES = " with upsert as (update left_tuples set object = ? "
+            + " where (parent_tuple_id = ? and "
+            + " parent_right_tuple_id = ? and "
+            + " fact_handle_id = ? and "
+            + " sink_id = ?) returning *) "
+            + " insert into left_tuples (left_tuple_id, parent_tuple_id, fact_handle_id, "
+            + " parent_right_tuple_id, sink_id, object) select nextval('left_tuple_id_seq'), ?, ?, ?, ?, ?  "
+            + " where not exists (select * from upsert) ";
+    /**
+     * 
+     */
     static final String UPDATE_RIGHT_TUPLE = "update right_tuples SET object = ? "
             + " where (fact_handle_id = ? and" + " sink_id = ? ); ";
     /**
@@ -148,7 +159,13 @@ public final class Statements {
     static final String INSERT_INTO_FACT_HANDLES = " INSERT into fact_handles (fact_handle_id, object)  "
             + " SELECT ?, ? WHERE NOT EXISTS "
             + " (SELECT 1 FROM fact_handles WHERE fact_handle_id = ?);";
-
+    /**
+     * 
+     */
+    static final String UPSERT_INTO_FACT_HANDLES = " with upsert as (update fact_handles set object = ? "
+            + " where (fact_handle_id = ?) returning *) "
+            + " insert into fact_handles (fact_handle_id, object) select ?, ?  "
+            + " where not exists (select * from upsert) ";
     /**
      * 
      */
