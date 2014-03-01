@@ -51,7 +51,7 @@ public class Car implements Serializable {
     /**
      * For persistence.
      */
-    Car() {
+    public Car() {
     }
 
     /**

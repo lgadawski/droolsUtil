@@ -64,7 +64,7 @@ public class House implements Serializable {
     /**
      * For persistence.
      */
-    House() {
+    public House() {
     }
 
     /**

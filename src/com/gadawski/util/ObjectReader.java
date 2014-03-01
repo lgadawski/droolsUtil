@@ -24,7 +24,7 @@ public class ObjectReader {
 	/**
 	 * Convert the facts from the <code>InputStream</code> to a list of objects.
 	 */
-	public static List<Object> getInputObjects(final InputStream inputStream) {
+	public List<Object> getInputObjects(final InputStream inputStream) {
 		final List<Object> list = new ArrayList<Object>();
 
 		try {
@@ -67,7 +67,7 @@ public class ObjectReader {
 	 * @throws IOException
 	 *             - thrown if wrong format.
 	 */
-	private static House readHouse(final String line, final StringTokenizer st)
+	private House readHouse(final String line, final StringTokenizer st)
 			throws IOException {
 		if (!"name".equals(st.nextToken())) {
 			throw new IOException("expected 'name' in: " + line);
@@ -95,7 +95,7 @@ public class ObjectReader {
 	 * @throws IOException
 	 *             - thrown exception if wrong format.
 	 */
-	private static Car readCar(final String line, final StringTokenizer st)
+	private Car readCar(final String line, final StringTokenizer st)
 			throws IOException {
 		if (!"name".equals(st.nextToken())) {
 			throw new IOException("expected 'name' in: " + line);
@@ -117,7 +117,7 @@ public class ObjectReader {
 	 * @throws IOException
 	 *             - thrown exception if wrong format.
 	 */
-	private static Customer readCustomer(final String line, final StringTokenizer st)
+	private Customer readCustomer(final String line, final StringTokenizer st)
 			throws IOException {
 		if (!"name".equals(st.nextToken())) {
 			throw new IOException("expected 'name' in: " + line);

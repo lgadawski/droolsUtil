@@ -2,6 +2,7 @@ package com.gadawski.util;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -32,41 +33,43 @@ public class ObjectsRandomizer {
     /**
      * Number of random generated person objects in file.
      */
-    // private static final int sNUM_OF_CUSTOMERS = 100000;
     private static int sNUM_OF_CUSTOMERS = 100;
     /**
      * Number of random generated car objects in file.
      */
-    // private static final int sNUM_OF_CARS = 50000;
     private static int sNUM_OF_CARS = 100;
     /**
      * Number of random generated house objects in file.
      */
-    // private static final int sNUM_OF_HOUSES = 50000;
     private static int sNUM_OF_HOUSES = 100;
+    /**
+     * 
+     */
+    private File file;
+
+    public ObjectsRandomizer(String path) throws FileNotFoundException {
+        file = new File(path);
+    }
 
     /**
      * Generates data to file.
+     * 
+     * @param generatedDataFilename
      * 
      * @param path
      *            - file name for output data.
      * @param noHouses
      * @param noCars
      * @param noCustomers
+     * @throws FileNotFoundException
      */
-    public static void generateData(final String path, Integer noCustomers,
-            Integer noCars, Integer noHouses) {
+    public void generateData(Integer noCustomers, Integer noCars,
+            Integer noHouses) throws FileNotFoundException {
         Writer writer = null;
         sNUM_OF_CUSTOMERS = noCustomers;
         sNUM_OF_CARS = noCars;
         sNUM_OF_HOUSES = noHouses;
         try {
-            // TODO handle wrong resource path, gets null pointer exception
-            // when resource path is invalid!
-            // null pointer exception if file doesn't exists, fix it!
-            // final URL url = ObjectsRandomizer.class.getResource("../" +
-            // path);
-            final File file = new File(path);
             writer = new BufferedWriter(new OutputStreamWriter(
                     new FileOutputStream(file), sTEXT_CODING));
             writeToFile(writer);
@@ -91,7 +94,7 @@ public class ObjectsRandomizer {
      * @throws IOException
      *             - throws if I/O exception.
      */
-    private static void writeToFile(final Writer writer) throws IOException {
+    private void writeToFile(final Writer writer) throws IOException {
         writeCustomers(writer);
         writeCars(writer);
         writeHouses(writer);
@@ -104,7 +107,7 @@ public class ObjectsRandomizer {
      *            - writer to write car..
      * @throws IOException
      */
-    private static void writeCars(final Writer writer) throws IOException {
+    private void writeCars(final Writer writer) throws IOException {
         final Random random = new Random();
         for (int i = 0; i < sNUM_OF_CARS; i++) {
             final int name = i;
@@ -121,7 +124,7 @@ public class ObjectsRandomizer {
      * @param writer
      * @throws IOException
      */
-    private static void writeHouses(final Writer writer) throws IOException {
+    private void writeHouses(final Writer writer) throws IOException {
         final Random random = new Random();
         for (int i = 0; i < sNUM_OF_HOUSES; i++) {
             final int name = i;
@@ -141,7 +144,7 @@ public class ObjectsRandomizer {
      *            - writer to write a people..
      * @throws IOException
      */
-    private static void writeCustomers(final Writer writer) throws IOException {
+    private void writeCustomers(final Writer writer) throws IOException {
         final Random random = new Random();
         for (int i = 0; i < sNUM_OF_CUSTOMERS; i++) {
             final int name = i;
@@ -169,7 +172,7 @@ public class ObjectsRandomizer {
      *            - max value for int.
      * @return
      */
-    private static int randomInt(final Random random, final int min,
+    public static int randomInt(final Random random, final int min,
             final int max) {
         return random.nextInt((max - min) + 1) + min;
     }
@@ -188,7 +191,7 @@ public class ObjectsRandomizer {
      *            - max value for float.
      * @return
      */
-    private static BigDecimal randomBigDecimal(final Random random,
+    public static BigDecimal randomBigDecimal(final Random random,
             final float min, final float max) {
         return BigDecimal.valueOf(random.nextFloat() * (max - min) + min)
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
