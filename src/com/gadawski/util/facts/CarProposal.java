@@ -1,5 +1,6 @@
 package com.gadawski.util.facts;
 
+
 /**
  * Class that represents car proposal for custom customer.
  * 
@@ -7,7 +8,6 @@ package com.gadawski.util.facts;
  * 
  */
 public class CarProposal {
-    
     
 	public Car car;
     public Customer customer;

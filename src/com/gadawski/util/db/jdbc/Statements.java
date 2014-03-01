@@ -112,6 +112,18 @@ public final class Statements {
             + " fact_handle_id = ? AND "
             + " sink_id = ?);";
     /**
+     * 
+     */
+    static final String INSERT_INTO_LT = " INSERT into LEFT_TUPLES "
+            + " (left_tuple_id, parent_tuple_id, fact_handle_id, parent_right_tuple_id, sink_id, object) "
+            + " values (nextval('left_tuple_id_seq'), ?, ?, ?, ?, ?) ";
+    /**
+     * 
+     */
+    static final String INSERT_INTO_FH = " INSERT into fact_handles "
+            + " (fact_handle_id, object) "
+            + " values (?, ?) ";
+    /**
      * This statement has to be combined with INSERT_INTO_LEFT_TUPLES_P
      * statement. parent_tuple_id, fact_handle_id, sink_id, object,
      * fact_handle_id, sink_id

@@ -122,7 +122,7 @@ public class JdbcManagerUtil {
     /**
      * Saves fact handle.
      */
-    public void saveFactHandle(final int handleId, final Object handle) {
+    public void saveFactHandle(final Integer handleId, final Object handle) {
         saveOrUpdateFactHandle(handleId, handle, Statements.UPDATE_FACT_HANDLE,
                 Statements.INSERT_INTO_FACT_HANDLES);
     }
@@ -467,58 +467,45 @@ public class JdbcManagerUtil {
         return null;
     }
 
-    /**
-     * Done in one transaction.
-     * 
-     * @return
-     */
-    private int saveLeftTupleParam(final Integer parentId,
-            final Integer handleId, final Integer parentRightTupleId,
-            final int sinkId, final Object tuple, final Object factHandle,
-            final String upsertLTStmt, final String upsertFHStmt) {
+    public int saveLeftTuple(Integer parentId, Integer handleId,
+            Integer parentRightTupleId, int sinkId, Object leftTuple,
+            Object factHandle) {
         Connection connection = null;
-        PreparedStatement upsertLT = null, upsertFH = null;
+        PreparedStatement insertFH = null, insertLT = null;
         int generatedKey = -1;
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
 
-            final byte[] dataLT = getData(tuple);
+            final byte[] dataLT = getData(leftTuple);
             final byte[] dataFH = getData(factHandle);
 
-            upsertFH = connection.prepareStatement(upsertFHStmt);
-            upsertFH.setPoolable(true);
-            upsertFH.setObject(1, dataFH);
-            upsertFH.setObject(2, handleId);
-            upsertFH.setObject(3, handleId);
-            upsertFH.setObject(4, dataFH);
-            upsertFH.executeUpdate();
+            insertFH = connection.prepareStatement(Statements.INSERT_INTO_FH);
+            // upsertLT.setPoolable(true);
+            insertFH.setObject(1, handleId);
+            insertFH.setObject(2, dataFH);
+            insertFH.executeUpdate();
 
-            upsertLT = connection.prepareStatement(upsertLTStmt,
+            insertLT = connection.prepareStatement(Statements.INSERT_INTO_LT,
                     Statement.RETURN_GENERATED_KEYS);
-            upsertLT.setPoolable(true);
-            upsertLT.setObject(1, dataLT);
-            upsertLT.setObject(2, parentId);
-            upsertLT.setObject(3, parentRightTupleId);
-            upsertLT.setObject(4, handleId);
-            upsertLT.setObject(5, sinkId);
-            upsertLT.setObject(6, parentId);
-            upsertLT.setObject(7, handleId);
-            upsertLT.setObject(8, parentRightTupleId);
-            upsertLT.setObject(9, sinkId);
-            upsertLT.setObject(10, dataLT);
-            upsertLT.executeUpdate();
+            // upsertFH.setPoolable(true);
+            insertLT.setObject(1, parentId);
+            insertLT.setObject(2, handleId);
+            insertLT.setObject(3, parentRightTupleId);
+            insertLT.setObject(4, sinkId);
+            insertLT.setObject(5, dataLT);
+            insertLT.executeUpdate();
 
             connection.commit();
             connection.setAutoCommit(true);
 
-            final ResultSet keys = upsertLT.getGeneratedKeys();
+            final ResultSet keys = insertLT.getGeneratedKeys();
             if (keys.next()) {
                 generatedKey = (int) keys.getLong(Statements.LEFT_TUPLE_ID);
             }
 
-            upsertFH.close();
-            closeEverything(connection, upsertLT, keys);
+            insertLT.close();
+            closeEverything(connection, insertFH, keys);
         } catch (final SQLException e) {
             e.printStackTrace();
         } catch (final IOException e) {
@@ -534,11 +521,10 @@ public class JdbcManagerUtil {
      */
     private int saveLeftTupleParam(final Integer parentId,
             final Integer handleId, final Integer parentRightTupleId,
-            final int sinkId, final Object tuple, final Object factHandle,
-            final String updateLTStmt, final String insertLTStmt,
-            final String updateFHStmt, final String insertFHStmt) {
+            final Integer sinkId, final Object tuple, final Object factHandle,
+            final String upsertLTStmt, final String upsertFHStmt) {
         Connection connection = null;
-        PreparedStatement insertLT = null, updateLT = null, updateFH = null, insertFH = null;
+        PreparedStatement upsertLT = null, upsertFH = null;
         int generatedKey = -1;
         try {
             connection = getConnection();
@@ -547,37 +533,39 @@ public class JdbcManagerUtil {
             final byte[] dataLT = getData(tuple);
             final byte[] dataFH = getData(factHandle);
 
-            updateFH = connection.prepareStatement(updateFHStmt);
-            setParamsForFactHandleUpdate(handleId, dataFH, updateFH);
-            updateFH.executeUpdate();
+            upsertFH = connection.prepareStatement(upsertFHStmt);
+            // upsertFH.setPoolable(true);
+            upsertFH.setObject(1, dataFH);
+            upsertFH.setObject(2, handleId);
+            upsertFH.setObject(3, handleId);
+            upsertFH.setObject(4, dataFH);
+            upsertFH.executeUpdate();
 
-            insertFH = connection.prepareStatement(insertFHStmt);
-            setParamsForFactHandleInsert(handleId, dataFH, insertFH);
-            insertFH.executeUpdate();
-
-            updateLT = connection.prepareStatement(updateLTStmt);
-            setParamsForLTUpdate(parentId, handleId, parentRightTupleId,
-                    sinkId, updateLT, dataLT);
-            updateLT.executeUpdate();
-
-            insertLT = connection.prepareStatement(insertLTStmt,
+            upsertLT = connection.prepareStatement(upsertLTStmt,
                     Statement.RETURN_GENERATED_KEYS);
-            setParamsForLTInsert(parentId, handleId, parentRightTupleId,
-                    sinkId, insertLT, dataLT);
-            insertLT.executeUpdate();
+            // upsertLT.setPoolable(true);
+            upsertLT.setObject(1, dataLT);
+            upsertLT.setObject(2, parentId);
+            upsertLT.setObject(3, parentRightTupleId);
+            upsertLT.setObject(4, handleId);
+            upsertLT.setObject(5, sinkId);
+            upsertLT.setObject(6, parentId);
+            upsertLT.setObject(7, handleId);
+            upsertLT.setObject(8, parentRightTupleId);
+            upsertLT.setInt(9, sinkId);
+            upsertLT.setObject(10, dataLT);
+            upsertLT.executeUpdate();
 
             connection.commit();
             connection.setAutoCommit(true);
 
-            final ResultSet keys = insertLT.getGeneratedKeys();
+            final ResultSet keys = upsertLT.getGeneratedKeys();
             if (keys.next()) {
                 generatedKey = (int) keys.getLong(Statements.LEFT_TUPLE_ID);
             }
 
-            updateFH.close();
-            updateLT.close();
-            insertFH.close();
-            closeEverything(connection, insertLT, keys);
+            upsertFH.close();
+            closeEverything(connection, upsertLT, keys);
         } catch (final SQLException e) {
             e.printStackTrace();
         } catch (final IOException e) {
@@ -601,39 +589,7 @@ public class JdbcManagerUtil {
         updateFH.setObject(2, handleId);
     }
 
-    private void setParamsForLTInsert(final Integer parentId,
-            final Integer handleId, final Integer parentRightTupleId,
-            final int sinkId, final PreparedStatement insertLT,
-            final byte[] data) throws SQLException {
-        // parent_tuple_id, fact_handle_id,
-        // sink_id, object, fact_handle_id, sink_id
-        insertLT.setObject(1, parentId);
-        insertLT.setObject(2, handleId);
-        insertLT.setObject(3, parentRightTupleId);
-        insertLT.setObject(4, sinkId);
-        insertLT.setObject(5, data);
-        insertLT.setObject(6, parentId);
-        insertLT.setObject(7, parentRightTupleId);
-        insertLT.setObject(8, handleId);
-        insertLT.setObject(9, sinkId);
-    }
-
-    private void setParamsForLTUpdate(final Integer parentId,
-            final Integer handleId, final Integer parentRightTupleId,
-            final int sinkId, final PreparedStatement updateLT,
-            final byte[] data) throws SQLException {
-        updateLT.setObject(1, data);
-        updateLT.setObject(2, parentId);
-        updateLT.setObject(3, parentRightTupleId);
-        updateLT.setObject(4, handleId);
-        updateLT.setObject(5, sinkId);
-    }
-
     /**
-     * @param sinkId
-     * @param tuple
-     * @param handleId
-     * @param insertRTStmt
      * @return
      */
     private int saveOrUpdateRightTuple(final Integer handleId,
@@ -720,7 +676,7 @@ public class JdbcManagerUtil {
             connection = getConnection();
 
             final byte[] data = getData(object);
-            
+
             statement = connection.prepareStatement(sqlStmt);
             statement.setPoolable(true);
             statement.setObject(1, id);
